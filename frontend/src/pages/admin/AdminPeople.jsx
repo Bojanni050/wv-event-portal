@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { KeyRound, Pencil, Plus } from "lucide-react";
+import { KeyRound, Loader2, Mail, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, PageLoader, SectionHeader } from "@/components/wv/bits";
 import { api, errorMessage } from "@/lib/api";
+import { formatRelative } from "@/lib/format";
 
 const COPY = {
   customers: { eyebrow: "Klanten", title: "Klanten", single: "klant", noteKey: "notes", noteLabel: "Notities" },
@@ -15,14 +17,20 @@ const COPY = {
 function PersonDialog({ kind, person, onClose, onSaved }) {
   const c = COPY[kind];
   const [form, setForm] = useState({});
-  useEffect(() => setForm(person ? { name: "", email: "", phone: "", notes: "", bio: "", password: "", ...person } : {}), [person]);
+  useEffect(() => setForm(person ? { name: "", email: "", phone: "", notes: "", bio: "", password: "", send_welcome: kind === "customers" && !person.id, ...person } : {}), [person, kind]);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const submit = async () => {
-    const payload = { name: form.name, email: form.email || null, phone: form.phone || null, notes: form.notes || null, bio: form.bio || null, password: form.password || null };
+    const welcome = kind === "customers" && !form.id && form.send_welcome;
+    const payload = { name: form.name, email: form.email || null, phone: form.phone || null, notes: form.notes || null, bio: form.bio || null, password: welcome ? null : form.password || null, send_welcome: welcome };
+    if (welcome && !form.email) return toast.error("Vul een e-mailadres in voor de welkomstmail");
     try {
       if (form.id) await api.patch(`/${kind}/${form.id}`, payload);
-      else await api.post(`/${kind}`, payload);
-      toast.success("Opgeslagen");
+      else {
+        const { data } = await api.post(`/${kind}`, payload);
+        if (data.welcome_error) toast.error(`Klant aangemaakt, maar: ${data.welcome_error}`);
+        else if (welcome) toast.success(`Welkomstmail verstuurd naar ${data.email}`);
+      }
+      if (!welcome) toast.success("Opgeslagen");
       onSaved();
     } catch (e) { toast.error(errorMessage(e)); }
   };
@@ -37,7 +45,13 @@ function PersonDialog({ kind, person, onClose, onSaved }) {
             <Field label="Telefoon"><Input value={form.phone || ""} onChange={set("phone")} className="wv-input h-11" data-testid="person-phone-input" /></Field>
           </div>
           <Field label={c.noteLabel}><Textarea rows={3} value={form[c.noteKey] || ""} onChange={set(c.noteKey)} className="wv-input" data-testid="person-note-input" /></Field>
-          {!form.has_login && (
+          {kind === "customers" && !form.id && (
+            <label className="flex items-start gap-3 text-sm text-zinc-300">
+              <Checkbox checked={!!form.send_welcome} onCheckedChange={(v) => setForm((f) => ({ ...f, send_welcome: !!v }))} className="mt-0.5" data-testid="person-send-welcome-checkbox" />
+              <span>Stuur een welkomstmail<span className="block text-xs text-zinc-500">De klant ontvangt een link (7 dagen geldig) om zelf een wachtwoord in te stellen.</span></span>
+            </label>
+          )}
+          {!form.has_login && !(kind === "customers" && !form.id && form.send_welcome) && (
             <Field label="Wachtwoord voor login" hint="Optioneel. Vul in om direct een account aan te maken (min. 8 tekens). Deel het wachtwoord zelf veilig met de persoon.">
               <Input type="text" value={form.password || ""} onChange={set("password")} className="wv-input h-11" data-testid="person-password-input" />
             </Field>
@@ -53,6 +67,19 @@ export default function AdminPeople({ kind }) {
   const c = COPY[kind];
   const [people, setPeople] = useState(null);
   const [editing, setEditing] = useState(null);
+  const [sending, setSending] = useState(null);
+  const sendWelcome = async (p) => {
+    setSending(p.id);
+    try {
+      await api.post(`/customers/${p.id}/welcome`);
+      toast.success(`Welkomstmail verstuurd naar ${p.email}`);
+      load();
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setSending(null);
+    }
+  };
   const load = useCallback(() => api.get(`/${kind}`).then((r) => setPeople(r.data)), [kind]);
   useEffect(() => { setPeople(null); load(); }, [load]);
   if (!people) return <PageLoader />;
@@ -74,6 +101,14 @@ export default function AdminPeople({ kind }) {
               <span>{p.event_count} event{p.event_count === 1 ? "" : "s"}</span>
               {p.has_login && <span className="flex items-center gap-1 text-[#E5C158]"><KeyRound className="h-3 w-3" />Heeft login</span>}
             </div>
+            {kind === "customers" && p.email && (
+              <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-4">
+                <span className="text-xs text-zinc-600" data-testid={`welcome-status-${p.id}`}>{p.welcome_sent_at ? `Welkomstmail ${formatRelative(p.welcome_sent_at)}` : "Nog geen welkomstmail"}</span>
+                <button onClick={() => sendWelcome(p)} disabled={sending === p.id} className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#E5C158]" data-testid={`send-welcome-${p.id}`}>
+                  {sending === p.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}{p.welcome_sent_at ? "Opnieuw sturen" : "Welkomstmail sturen"}
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>

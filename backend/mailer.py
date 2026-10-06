@@ -96,6 +96,33 @@ async def send_email(*, to: str, subject: str, html: str) -> str:
     return resp.json().get("id")
 
 
+def welcome_email_html(name: str, link: str, event_line: str = "") -> str:
+    brand = escape(os.environ["EMAIL_FROM_NAME"])
+    event_html = (f'<tr><td style="padding:20px 40px 0"><table role="presentation" cellpadding="0" cellspacing="0" '
+                  f'style="border-left:2px solid #D4AF37"><tr><td style="padding:4px 0 4px 16px;font-size:20px;color:#F4F4F5">'
+                  f'{escape(event_line)}</td></tr></table></td></tr>') if event_line else ""
+    return (
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#09090B;padding:32px 0">'
+        '<tr><td align="center"><table role="presentation" width="520" cellpadding="0" cellspacing="0" '
+        'style="background:#111114;border:1px solid #27272a;font-family:Georgia,serif;color:#F4F4F5">'
+        f'<tr><td style="padding:32px 40px 8px;font-family:Arial,sans-serif;font-size:12px;letter-spacing:6px;color:#D4AF37">{brand.upper()}</td></tr>'
+        f'<tr><td style="padding:16px 40px 0;font-size:32px;line-height:1.15">Welkom, {escape(name)}</td></tr>'
+        '<tr><td style="padding:16px 40px 0;font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#d4d4d8">'
+        f'Je persoonlijke event-omgeving bij {brand} staat klaar. Hier bereid je samen met je DJ alles voor: '
+        'muziekwensen, het draaischema, je uitnodiging en een directe chat.</td></tr>'
+        f'{event_html}'
+        '<tr><td style="padding:20px 40px 0;font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#d4d4d8">'
+        'Kies eerst je eigen wachtwoord via de knop hieronder. De link is 7 dagen geldig en werkt één keer.</td></tr>'
+        f'<tr><td style="padding:28px 40px"><a href="{escape(link)}" style="display:inline-block;background:#D4AF37;color:#000;'
+        'font-family:Arial,sans-serif;font-weight:bold;font-size:14px;text-decoration:none;padding:14px 28px;border-radius:999px">'
+        'Wachtwoord instellen</a></td></tr>'
+        '<tr><td style="padding:0 40px 32px;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;color:#71717a">'
+        'Link verlopen? Gebruik "Wachtwoord vergeten" op het inlogscherm. '
+        f'Verzonden door {brand}. We vragen nooit om je wachtwoord per e-mail.</td></tr>'
+        '</table></td></tr></table>'
+    )
+
+
 def reset_email_html(name: str, link: str) -> str:
     brand = escape(os.environ["EMAIL_FROM_NAME"])
     return (

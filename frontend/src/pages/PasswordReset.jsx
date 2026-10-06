@@ -71,6 +71,7 @@ export function ForgotPassword() {
 export function ResetPassword() {
   const [params] = useSearchParams();
   const token = params.get("token") || "";
+  const welcome = params.get("welkom") === "1";
   const [form, setForm] = useState({ password: "", confirm: "" });
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -105,8 +106,9 @@ export function ResetPassword() {
   return (
     <Shell>
       <form onSubmit={submit} data-testid="reset-form">
-        <p className="wv-eyebrow mb-4">Nieuw wachtwoord</p>
-        <h1 className="font-display text-4xl text-white sm:text-5xl">Kies een wachtwoord</h1>
+        <p className="wv-eyebrow mb-4">{welcome ? "Welkom bij White Vision" : "Nieuw wachtwoord"}</p>
+        <h1 className="font-display text-4xl text-white sm:text-5xl">{welcome ? "Stel je wachtwoord in" : "Kies een wachtwoord"}</h1>
+        {welcome && <p className="mt-3 text-sm text-zinc-400">Daarna kun je direct aan de slag met de voorbereiding van je event.</p>}
         <div className="mt-10 space-y-5">
           <Field label="Nieuw wachtwoord" hint="Minimaal 8 tekens.">
             <Input type="password" required autoComplete="new-password" value={form.password} onChange={set("password")} className="wv-input h-12" data-testid="reset-password-input" />

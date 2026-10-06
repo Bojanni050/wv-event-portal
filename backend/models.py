@@ -22,6 +22,7 @@ class Customer(BaseDocument):
     notes: Optional[str] = None
     user_id: Optional[PyObjectId] = None
     external_id: Optional[str] = None
+    welcome_sent_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
 
 

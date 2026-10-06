@@ -16,6 +16,7 @@ from models import User
 router = APIRouter(prefix="/auth", tags=["auth"])
 log = logging.getLogger(__name__)
 RESET_TTL = timedelta(hours=1)
+WELCOME_TTL = timedelta(days=7)
 RESET_LIMIT_PER_HOUR = 3
 
 
@@ -40,6 +41,15 @@ class ResetIn(BaseModel):
 
 def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
+
+
+async def issue_password_link(user_id: str, ttl: timedelta, purpose: str = "reset") -> str:
+    token = secrets.token_urlsafe(32)
+    await db.password_reset_tokens.insert_one({
+        "user_id": user_id, "token_hash": _hash_token(token), "used": False, "purpose": purpose,
+        "created_at": now(), "expires_at": now() + ttl})
+    suffix = "&welkom=1" if purpose == "welcome" else ""
+    return f"{os.environ['FRONTEND_URL'].rstrip('/')}/wachtwoord-herstellen?token={token}{suffix}"
 
 
 def client_ip(request: Request) -> str:
@@ -120,11 +130,7 @@ async def forgot_password(body: ForgotIn):
         {"user_id": str(user["_id"]), "created_at": {"$gt": now() - timedelta(hours=1)}})
     if recent >= RESET_LIMIT_PER_HOUR:
         return GENERIC_FORGOT
-    token = secrets.token_urlsafe(32)
-    await db.password_reset_tokens.insert_one({
-        "user_id": str(user["_id"]), "token_hash": _hash_token(token), "used": False,
-        "created_at": now(), "expires_at": now() + RESET_TTL})
-    link = f"{os.environ['FRONTEND_URL'].rstrip('/')}/wachtwoord-herstellen?token={token}"
+    link = await issue_password_link(str(user["_id"]), RESET_TTL)
     try:
         await send_email(to=email, subject="Stel een nieuw wachtwoord in voor White Vision",
                          html=reset_email_html(user["name"], link))

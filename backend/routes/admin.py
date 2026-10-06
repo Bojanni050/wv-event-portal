@@ -1,14 +1,21 @@
-from datetime import date
+import logging
+import secrets
+from datetime import date, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from core import db, event_scope, hash_password, now, oid, require_admin, require_staff, unread_filter
+from mailer import send_email, welcome_email_html
 from models import DJ, Customer, Message, User
+from routes.auth import WELCOME_TTL, issue_password_link
 from services import enrich_event
 
 router = APIRouter(tags=["admin"])
+log = logging.getLogger(__name__)
+MONTHS = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september",
+          "oktober", "november", "december"]
 
 
 class PersonIn(BaseModel):
@@ -18,6 +25,7 @@ class PersonIn(BaseModel):
     notes: Optional[str] = None
     bio: Optional[str] = None
     password: Optional[str] = None
+    send_welcome: bool = False
 
 
 async def _create_login(email: Optional[str], password: Optional[str], name: str, role: str, link: dict):
@@ -40,6 +48,40 @@ async def _person_out(model, doc):
     return data
 
 
+def _event_line(ev: Optional[dict]) -> str:
+    if not ev:
+        return ""
+    if not ev.get("date"):
+        return ev["title"]
+    d = date.fromisoformat(ev["date"])
+    return f"{ev['title']} · {d.day} {MONTHS[d.month - 1]} {d.year}"
+
+
+async def _send_welcome(customer: dict):
+    cid = str(customer["_id"])
+    if not customer.get("email"):
+        raise HTTPException(400, "Deze klant heeft geen e-mailadres")
+    uid = customer.get("user_id")
+    if not uid:
+        uid = await _create_login(customer["email"], secrets.token_urlsafe(32), customer["name"], "customer",
+                                  {"customer_id": cid})
+        await db.customers.update_one({"_id": customer["_id"]}, {"$set": {"user_id": uid}})
+    recent = await db.password_reset_tokens.count_documents(
+        {"user_id": uid, "purpose": "welcome", "created_at": {"$gt": now() - timedelta(hours=1)}})
+    if recent >= 3:
+        raise HTTPException(429, "Er zijn het afgelopen uur al 3 welkomstmails verstuurd")
+    user = await db.users.find_one({"_id": oid(uid)})
+    ev = await db.events.find_one({"customer_id": cid}, sort=[("date", 1)])
+    link = await issue_password_link(uid, WELCOME_TTL, "welcome")
+    try:
+        await send_email(to=user["email"], subject="Welkom bij White Vision, je event-omgeving staat klaar",
+                         html=welcome_email_html(customer["name"], link, _event_line(ev)))
+    except Exception as e:
+        log.error("Welcome email failed for customer %s: %s", cid, e)
+        raise HTTPException(502, "Welkomstmail kon niet worden verstuurd")
+    await db.customers.update_one({"_id": customer["_id"]}, {"$set": {"welcome_sent_at": now()}})
+
+
 @router.get("/customers")
 async def list_customers(user: dict = Depends(require_staff)):
     docs = await db.customers.find().sort("name", 1).to_list(2000)
@@ -58,13 +100,34 @@ async def create_customer(body: PersonIn, user: dict = Depends(require_admin)):
                                                  notes=body.notes, created_at=now()).to_mongo())
     cid = str(res.inserted_id)
     try:
-        uid = await _create_login(email, body.password, body.name, "customer", {"customer_id": cid})
+        uid = await _create_login(email, None if body.send_welcome else body.password, body.name, "customer",
+                                  {"customer_id": cid})
     except HTTPException:
         await db.customers.delete_one({"_id": res.inserted_id})
         raise
     if uid:
         await db.customers.update_one({"_id": res.inserted_id}, {"$set": {"user_id": uid}})
-    return await _person_out(Customer, await db.customers.find_one({"_id": res.inserted_id}))
+    welcome_error = None
+    if body.send_welcome and email:
+        try:
+            await _send_welcome(await db.customers.find_one({"_id": res.inserted_id}))
+        except HTTPException as e:
+            if e.status_code == 400 and "account" in str(e.detail):
+                await db.customers.delete_one({"_id": res.inserted_id})
+                raise
+            welcome_error = e.detail
+    data = await _person_out(Customer, await db.customers.find_one({"_id": res.inserted_id}))
+    data["welcome_error"] = welcome_error
+    return data
+
+
+@router.post("/customers/{customer_id}/welcome")
+async def send_customer_welcome(customer_id: str, user: dict = Depends(require_admin)):
+    doc = await db.customers.find_one({"_id": oid(customer_id)})
+    if not doc:
+        raise HTTPException(404, "Klant niet gevonden")
+    await _send_welcome(doc)
+    return await _person_out(Customer, await db.customers.find_one({"_id": doc["_id"]}))
 
 
 @router.patch("/customers/{customer_id}")
