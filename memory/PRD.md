@@ -24,6 +24,11 @@ User choices: Dutch UI; email+password login; files stored in database; React+Fa
 - Admin: overview, events (search/filter/create/detail tabs/status/delete), customers & DJs (optional login), templates CRUD
 - Tested: 32/32 backend tests, frontend smoke flows
 
+## Implemented (2026-10-06, iteration 2-3)
+- Invitation PDF export (148x185mm) next to PNG
+- RSVP: public form on shared invitation (/u/:token), toggle + deadline in builder, "Gasten" page (stats, filters, search, delete, CSV export), dashboard card, admin tab
+- Customer account page (/event/:id/account): edit name/email/phone (synced to customer record), change password (current + new)
+
 ## Backlog
 - P1: PDF export of invitation; DELETE DJ endpoint; forgot-password via email (needs email provider); tighten CORS_ORIGINS to production domain
 - P2: Spotify search, email/WhatsApp notifications, RSVP/guest management, payments/deposit status, multiple DJs, photo gallery, AI planning, reminders, TypeScript migration

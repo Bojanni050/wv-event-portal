@@ -1,0 +1,22 @@
+{
+  "summary": "Tested customer account page (GET/PATCH /api/account) and POST /api/auth/password end-to-end. 9/9 backend pytest cases pass (auth guard, prefill, PATCH persistence incl. customers collection sync, email conflict 400, invalid email 400, wrong current pw 400, short pw 400, password change + login flow, events regression). Frontend verified: user-menu-trigger -> account-menu-item navigates to /event/<id>/account; prefill correct; save shows toast and reload persists both name + phone + header updates; email conflict shows error toast 'Dit e-mailadres is al in gebruik' (PATCH 400 confirmed via network); password form shows account-password-error for wrong current, mismatch, and <8 chars; dashboard overview and chat still render. All test data restored (jeroen name 'Jeroen & Mark', email jeroen@example.nl, phone '06 00000010'; sanne password Demo!2027). login_attempts cleaned.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_account.py",
+    "/app/test_reports/pytest/account_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Account.jsx Password form validates length client-side AFTER mismatch check order - fine, but server-side the length check runs AFTER verify_password, so wrong-current for a short new password returns 'klopt niet' instead of length error - acceptable UX because client blocks first.",
+    "routes/account.py update_account does not strip whitespace from phone; empty string becomes stored as '' not None. Currently FE sends `phone || null` so OK, but a direct API caller could store blank strings. Minor hardening suggestion.",
+    "No rate limiting / audit log on PATCH /api/account email changes; a leaked session can hijack email. Consider requiring current_password confirmation for email change (future enhancement)."
+  ],
+  "updated_files": ["/app/backend/tests/test_account.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "jeroen@example.nl / Demo!2027 (customer), sanne@example.nl / Demo!2027 (customer), bas@white-vision.nl / Demo!2027 (dj)",
+  "seed_data_creation": "none; used existing seeded users. All modified data restored to original state.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Account feature (GET/PATCH /api/account + POST /api/auth/password) is fully working. Test file at /app/backend/tests/test_account.py covers all cases. One flaky observation during an early UI run: on page.reload() immediately after save, the input occasionally showed stale name — repeated runs and direct API fetch confirmed data IS persisted correctly; attributed to React controlled-input timing in the test, not an app bug. Do NOT run more than ~4 bad logins per IP+email against the same account (lockout at 5)."
+}
