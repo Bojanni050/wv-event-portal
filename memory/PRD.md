@@ -28,6 +28,7 @@ User choices: Dutch UI; email+password login; files stored in database; React+Fa
 - Invitation PDF export (148x185mm) next to PNG
 - RSVP: public form on shared invitation (/u/:token), toggle + deadline in builder, "Gasten" page (stats, filters, search, delete, CSV export), dashboard card, admin tab
 - Customer account page (/event/:id/account): edit name/email/phone (synced to customer record), change password (current + new)
+- Wachtwoord vergeten: login link → /wachtwoord-vergeten, reset email via Emergent-managed Resend (sender "White Vision"), /wachtwoord-herstellen?token= (sha256-hashed single-use token, 1h, max 3/hour, no email enumeration). FRONTEND_URL in backend/.env sets the link domain (set to https://app.white-vision.nl in production)
 
 ## Backlog
 - P1: PDF export of invitation; DELETE DJ endpoint; forgot-password via email (needs email provider); tighten CORS_ORIGINS to production domain

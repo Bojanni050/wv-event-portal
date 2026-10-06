@@ -1,0 +1,24 @@
+{
+  "summary": "Tested the new 'Wachtwoord vergeten' (password reset) flow end-to-end. 8/8 pytest cases pass in /app/backend/tests/test_password_reset.py covering: forgot-password generic 200 for unknown emails, token row (sha256 hash, used=false, 1h TTL) created for known users, rate-limit at 3 tokens/hour (4th call returns generic 200 without new token), reset-password happy path (login works with new pw, same token reused → 400 'ongeldig of verlopen'), expired tokens → 400, short password → 400, other outstanding tokens for the same user marked used after successful reset, and normal login regression. Frontend verified via Playwright: forgot-password-link on login navigates to /wachtwoord-vergeten; forgot-email-input + forgot-submit-button yields forgot-success with generic 'bekend' message for unknown emails; /wachtwoord-herstellen without token shows reset-error and disabled reset-submit-button; <8 chars + mismatch show reset-error; valid token + matching pw ≥8 reaches reset-success; subsequent UI login with the new password succeeds. Only 1 real forgot-password call for example.nl was made (unknown-user path); rate-limit test used delivered@resend.dev sandbox mailbox via TEST_Reset customer. All test data cleaned up (TEST customer removed, password_reset_tokens + login_attempts emptied, sanne restored to Demo!2027 and verified by API login).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_password_reset.py",
+    "/app/test_reports/pytest/password_reset_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "auth.py reset-password: length check (<8) happens BEFORE token validity check. This leaks that *some* token could be valid vs invalid is still safe here, but it also means an attacker probing with short passwords gets a different status (400 length) than with valid-length (400 ongeldig). Both are 400s but messages differ. Low risk because messages are same shape, but consider validating token first.",
+    "forgot-password rate limit (3/hour) uses count_documents on created_at. If a user manages to spam, the 4th call still writes nothing but ALWAYS attempts a Mongo count — fine. However there is no per-IP throttle; a single IP can enumerate accounts indirectly by timing (DB write vs skip). The generic 200 response is identical, but response time differs (insert + email send on known users). Consider adding small constant-time jitter or a background task for the send.",
+    "mailer.send_email awaits the HTTP POST inline inside the request handler. On Emergent email provider latency, forgot-password endpoint can take seconds to respond, which (1) also leaks hit vs miss via timing and (2) blocks the request worker. Consider BackgroundTasks / fire-and-forget.",
+    "No audit log is written for password resets (who, when, from which IP). Useful for forensics; consider inserting into a password_reset_audit collection.",
+    "password_reset_tokens has no TTL index; expired/used tokens accumulate. Add Mongo TTL index on expires_at for automatic cleanup."
+  ],
+  "updated_files": ["/app/backend/tests/test_password_reset.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "sanne@example.nl / Demo!2027 (RESTORED), bojan.vanderheide@gmail.com / WhiteVision!2026 (admin)",
+  "seed_data_creation": "Temporarily created customer TEST_Reset <delivered@resend.dev>/TestPass123 and 4 password_reset_tokens rows via forgot-password; also inserted 4 synthetic password_reset_tokens for sanne for reset UI/API tests. All seed data deleted (customers.email=delivered@resend.dev removed, password_reset_tokens emptied, login_attempts emptied). Sanne password restored to Demo!2027 and verified via /api/auth/login (200).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Password reset feature works end-to-end. test_password_reset.py is a safe regression suite that (a) uses delivered@resend.dev sandbox so no real inbox is spammed by rate-limit tests, (b) inserts tokens directly into Mongo for the reset-password endpoint so no real email delivery is required, and (c) restores sanne's password at module teardown. Only 1 call per run goes to a real example.nl address (the unknown-email generic path, which triggers no email). Do not add tests that trigger forgot-password for jeroen/sanne because that would send real emails."
+}
