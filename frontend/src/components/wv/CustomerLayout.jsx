@@ -11,7 +11,7 @@ import { formatDate } from "@/lib/format";
 
 const NAV = [
   ["", "Overzicht"], ["details", "Mijn event"], ["chat", "Chat met DJ"], ["muziek", "Muziek"],
-  ["draaischema", "Draaischema"], ["uitnodiging", "Uitnodiging"], ["bestanden", "Bestanden"],
+  ["draaischema", "Draaischema"], ["uitnodiging", "Uitnodiging"], ["gasten", "Gasten"], ["bestanden", "Bestanden"],
 ];
 
 export default function CustomerLayout() {

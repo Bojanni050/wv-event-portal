@@ -154,6 +154,19 @@ class InvitationFields(BaseModel):
     accent_color: str = "#D4AF37"
     font: str = "playfair"
     layout: str = "classic"
+    rsvp_enabled: bool = True
+    rsvp_deadline: Optional[str] = None
+
+
+class Rsvp(BaseDocument):
+    event_id: PyObjectId
+    name: str
+    email: Optional[str] = None
+    attending: str
+    guests: int = 1
+    dietary: Optional[str] = None
+    message: Optional[str] = None
+    created_at: Optional[datetime] = None
 
 
 class Invitation(BaseDocument, InvitationFields):

@@ -45,7 +45,7 @@ async def create_indexes():
     await db.events.create_index([("customer_id", 1), ("date", 1)])
     await db.events.create_index("dj_id")
     await db.messages.create_index([("event_id", 1), ("created_at", 1)])
-    for col in ("music_items", "timeline_items", "files"):
+    for col in ("music_items", "timeline_items", "files", "rsvps"):
         await db[col].create_index("event_id")
     await db.invitations.create_index("event_id", unique=True)
     await db.invitations.create_index("share_token", sparse=True)

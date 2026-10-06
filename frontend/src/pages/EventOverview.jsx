@@ -108,7 +108,10 @@ export default function EventOverview() {
         <Card to={`${base}/uitnodiging`} eyebrow="Uitnodiging" title={s.invitation_saved ? "Klaar om te delen" : "Ontwerp je uitnodiging"} testId="card-invitation" className="md:col-span-2" delay="wv-d3">
           {s.invitation_shared ? "Je uitnodiging is gedeeld." : "Kies een sjabloon en maak hem helemaal van jullie."}
         </Card>
-        <Card to={`${base}/bestanden`} eyebrow="Bestanden" title={`${s.files_count} bestanden`} testId="card-files" className="md:col-span-6" delay="wv-d4">
+        <Card to={`${base}/gasten`} eyebrow="Gasten" title={`${s.rsvp.attending_guests} gasten komen`} testId="card-guests" className="md:col-span-3" delay="wv-d4">
+          {s.rsvp.responses ? `${s.rsvp.responses} reacties · ${s.rsvp.maybe} misschien · ${s.rsvp.declined} komen niet` : "Deel je uitnodiging en zie hier wie er komt."}
+        </Card>
+        <Card to={`${base}/bestanden`} eyebrow="Bestanden" title={`${s.files_count} bestanden`} testId="card-files" className="md:col-span-3" delay="wv-d4">
           Foto's, contracten en documenten voor dit event.
         </Card>
       </section>

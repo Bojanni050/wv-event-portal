@@ -11,14 +11,14 @@ from fastapi import APIRouter, FastAPI  # noqa: E402
 from starlette.middleware.cors import CORSMiddleware  # noqa: E402
 
 from core import client  # noqa: E402
-from routes import admin, auth, events, files, integrations, invitations, messages, music, timeline  # noqa: E402
+from routes import admin, auth, events, files, integrations, invitations, messages, music, rsvp, timeline  # noqa: E402
 from seed import run_seed  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 app = FastAPI(title="White Vision Portal API", version="1.0.0")
 api = APIRouter(prefix="/api")
-for module in (auth, events, messages, music, timeline, files, invitations, admin, integrations):
+for module in (auth, events, messages, music, timeline, files, invitations, rsvp, admin, integrations):
     api.include_router(module.router)
 
 

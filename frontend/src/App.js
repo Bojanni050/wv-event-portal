@@ -15,6 +15,7 @@ import Music from "@/features/Music";
 import Timeline from "@/features/Timeline";
 import InvitationBuilder from "@/features/InvitationBuilder";
 import Files from "@/features/Files";
+import GuestList from "@/features/GuestList";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminEvents from "@/pages/admin/AdminEvents";
 import AdminEventDetail from "@/pages/admin/AdminEventDetail";
@@ -39,6 +40,7 @@ function App() {
               <Route path="muziek" element={<Music />} />
               <Route path="draaischema" element={<Timeline />} />
               <Route path="uitnodiging" element={<InvitationBuilder />} />
+              <Route path="gasten" element={<GuestList />} />
               <Route path="bestanden" element={<Files />} />
             </Route>
             <Route path="/admin" element={<ProtectedRoute roles={STAFF}><AdminLayout /></ProtectedRoute>}>

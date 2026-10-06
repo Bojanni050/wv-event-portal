@@ -56,7 +56,7 @@ async def delete_event(event_id: str, user: dict = Depends(require_admin)):
     ev = await get_event_for(user, event_id)
     async for f in db.files.find({"event_id": event_id}):
         await fs.delete(ObjectId(f["gridfs_id"]))
-    for col in ("files", "messages", "music_items", "timeline_items", "invitations"):
+    for col in ("files", "messages", "music_items", "timeline_items", "invitations", "rsvps"):
         await db[col].delete_many({"event_id": event_id})
     await db.events.delete_one({"_id": ev["_id"]})
     return {"ok": True}

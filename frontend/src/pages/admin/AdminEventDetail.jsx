@@ -15,8 +15,9 @@ import Music from "@/features/Music";
 import Timeline from "@/features/Timeline";
 import InvitationBuilder from "@/features/InvitationBuilder";
 import Files from "@/features/Files";
+import GuestList from "@/features/GuestList";
 
-const TABS = [["details", "Gegevens", EventDetails], ["chat", "Chat", Chat], ["music", "Muziek", Music], ["timeline", "Draaischema", Timeline], ["invitation", "Uitnodiging", InvitationBuilder], ["files", "Bestanden", Files]];
+const TABS = [["details", "Gegevens", EventDetails], ["chat", "Chat", Chat], ["music", "Muziek", Music], ["timeline", "Draaischema", Timeline], ["invitation", "Uitnodiging", InvitationBuilder], ["guests", "Gasten", GuestList], ["files", "Bestanden", Files]];
 
 function Header() {
   const { event, reload } = useEvent();

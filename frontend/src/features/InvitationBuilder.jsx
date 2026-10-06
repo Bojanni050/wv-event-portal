@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Download, ImagePlus, Link2, Loader2, Save, X } from "lucide-react";
+import { Download, FileDown, ImagePlus, Link2, Loader2, Save, X } from "lucide-react";
 import { toPng } from "html-to-image";
+import { jsPDF } from "jspdf";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +24,7 @@ function defaults(event, tpl) {
     location: event.venue_name || "", description: "", photo_url: tpl?.photo_url || null, photo_file_id: null,
     background_color: tpl?.background_color || "#09090B", text_color: tpl?.text_color || "#F4F4F5",
     accent_color: tpl?.accent_color || "#D4AF37", font: tpl?.font || "playfair", layout: tpl?.layout || "classic",
+    rsvp_enabled: true, rsvp_deadline: "",
   };
 }
 
@@ -81,12 +84,19 @@ export default function InvitationBuilder() {
     await navigator.clipboard?.writeText(url).catch(() => {});
     toast.success("Deellink gekopieerd", { description: url });
   });
+  const fileBase = `uitnodiging-${event.title.replace(/\W+/g, "-").toLowerCase()}`;
   const download = () => act("png", async () => {
     const dataUrl = await toPng(preview.current, { pixelRatio: 2, cacheBust: true });
     const a = document.createElement("a");
     a.href = dataUrl;
-    a.download = `uitnodiging-${event.title.replace(/\W+/g, "-").toLowerCase()}.png`;
+    a.download = `${fileBase}.png`;
     a.click();
+  });
+  const downloadPdf = () => act("pdf", async () => {
+    const dataUrl = await toPng(preview.current, { pixelRatio: 3, cacheBust: true });
+    const pdf = new jsPDF({ unit: "mm", format: [148, 185], orientation: "portrait" });
+    pdf.addImage(dataUrl, "PNG", 0, 0, 148, 185);
+    pdf.save(`${fileBase}.pdf`);
   });
   const upload = (file) => file && act("photo", async () => {
     const fd = new FormData();
@@ -112,6 +122,7 @@ export default function InvitationBuilder() {
         action={
           <div className="flex flex-wrap gap-2">
             <button onClick={download} disabled={!!busy} className="wv-btn-ghost" data-testid="inv-download-button">{busy === "png" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}PNG</button>
+            <button onClick={downloadPdf} disabled={!!busy} className="wv-btn-ghost" data-testid="inv-download-pdf-button">{busy === "pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}PDF</button>
             <button onClick={share} disabled={!!busy} className="wv-btn-ghost" data-testid="inv-share-button"><Link2 className="h-4 w-4" />Delen</button>
             <button onClick={save} disabled={!!busy} className="wv-btn" data-testid="inv-save-button"><Save className="h-4 w-4" />Opslaan</button>
           </div>
@@ -143,6 +154,13 @@ export default function InvitationBuilder() {
             <div className="grid grid-cols-2 gap-4">{txt("date_text", "Datum")}{txt("time_text", "Tijd")}</div>
             {txt("location", "Locatie")}
             {txt("description", "Persoonlijke tekst", true)}
+            <div className="wv-panel space-y-4 p-5">
+              <label className="flex items-center justify-between gap-4 text-sm text-zinc-200">
+                <span><span className="block text-white">Gasten laten reageren (RSVP)</span><span className="text-xs text-zinc-500">Gasten melden zich aan via de gedeelde link.</span></span>
+                <Switch checked={inv.rsvp_enabled !== false} onCheckedChange={set("rsvp_enabled")} data-testid="inv-rsvp-switch" />
+              </label>
+              {inv.rsvp_enabled !== false && txt("rsvp_deadline", "Graag reageren voor (optioneel)")}
+            </div>
           </TabsContent>
           <TabsContent value="style" className="space-y-8">
             <Field label="Layout"><div className="flex flex-wrap gap-2">{Object.entries(LAYOUTS).map(([k, l]) => <Chip key={k} active={inv.layout === k} onClick={() => set("layout")(k)} testId={`inv-layout-${k}`}>{l}</Chip>)}</div></Field>

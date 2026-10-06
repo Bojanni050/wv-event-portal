@@ -25,6 +25,9 @@ async def event_stats(ev: dict) -> dict:
     files = await db.files.count_documents({"event_id": eid, "category": {"$ne": "chat"}})
     last = await db.messages.find_one({"event_id": eid}, sort=[("created_at", -1)])
     pinned = await db.messages.count_documents({"event_id": eid, "pinned": True})
+    rsvp_rows = await db.rsvps.aggregate([{"$match": {"event_id": eid}}, {"$group": {
+        "_id": "$attending", "n": {"$sum": 1}, "guests": {"$sum": "$guests"}}}]).to_list(5)
+    rsvp = {r["_id"]: r for r in rsvp_rows}
 
     missing_info = [label for key, label in INFO_FIELDS.items() if not ev.get(key)]
     missing_final = [label for key, label in FINAL_FIELDS.items() if not ev.get(key)]
@@ -46,7 +49,10 @@ async def event_stats(ev: dict) -> dict:
             "music": {k: music.get(k, 0) for k in ("must_play", "dont_play", "favorite", "special")},
             "timeline_count": n, "timeline_confirmed": confirmed, "files_count": files,
             "invitation_saved": bool(invitation), "invitation_shared": bool(invitation and invitation.get("share_token")),
-            "pinned_count": pinned, "missing_info": missing_info, "missing_final": missing_final,
+            "pinned_count": pinned,
+            "rsvp": {"responses": sum(r["n"] for r in rsvp_rows),
+                     "attending_guests": rsvp.get("yes", {}).get("guests", 0),
+                     "declined": rsvp.get("no", {}).get("n", 0), "maybe": rsvp.get("maybe", {}).get("n", 0)}, "missing_info": missing_info, "missing_final": missing_final,
             "last_message": {"text": last.get("text") or (last.get("attachment") or {}).get("filename", ""),
                              "sender_name": last["sender_name"], "sender_role": last["sender_role"],
                              "created_at": last["created_at"]} if last else None,
