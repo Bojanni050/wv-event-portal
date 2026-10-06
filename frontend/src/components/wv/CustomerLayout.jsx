@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut, UserRound } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Logo } from "./Logo";
 import { NotificationBell } from "./NotificationBell";
@@ -54,6 +54,9 @@ export default function CustomerLayout() {
                     <DropdownMenuSeparator />
                   </>
                 )}
+                <DropdownMenuItem data-testid="account-menu-item" onClick={() => navigate(`/event/${eventId}/account`)}>
+                  <UserRound className="mr-2 h-4 w-4" /> Mijn account
+                </DropdownMenuItem>
                 <DropdownMenuItem data-testid="logout-button" onClick={logout}>
                   <LogOut className="mr-2 h-4 w-4" /> Uitloggen
                 </DropdownMenuItem>

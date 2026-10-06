@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/components/wv/bits";
 import CustomerLayout from "@/components/wv/CustomerLayout";
 import AdminLayout from "@/components/wv/AdminLayout";
 import Login from "@/pages/Login";
+import Account from "@/pages/Account";
 import RoleHome from "@/pages/RoleHome";
 import EventOverview from "@/pages/EventOverview";
 import PublicInvitation from "@/pages/PublicInvitation";
@@ -42,6 +43,7 @@ function App() {
               <Route path="uitnodiging" element={<InvitationBuilder />} />
               <Route path="gasten" element={<GuestList />} />
               <Route path="bestanden" element={<Files />} />
+              <Route path="account" element={<Account />} />
             </Route>
             <Route path="/admin" element={<ProtectedRoute roles={STAFF}><AdminLayout /></ProtectedRoute>}>
               <Route index element={<AdminDashboard />} />

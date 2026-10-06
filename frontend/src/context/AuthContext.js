@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
   };
 
   const isStaff = !!user && ["admin", "dj"].includes(user.role);
-  return <AuthCtx.Provider value={{ user, login, logout, isStaff }}>{children}</AuthCtx.Provider>;
+  return <AuthCtx.Provider value={{ user, setUser, login, logout, isStaff }}>{children}</AuthCtx.Provider>;
 }
 
 export const useAuth = () => useContext(AuthCtx);

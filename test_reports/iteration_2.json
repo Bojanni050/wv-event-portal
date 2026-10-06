@@ -1,0 +1,28 @@
+{
+  "summary": "End-to-end testing of new PDF export + RSVP guest list features for White Vision portal. Backend: added /app/backend/tests/test_rsvp.py (14/14 pytest cases pass) covering invitation save with rsvp_enabled/rsvp_deadline, public GET invitation, POST /public/invitations/{token}/rsvp for yes/no/maybe (no sets guests=0), bad token 404, invalid attending 400, rsvp_enabled=false returns 400, GET /events/{id}/rsvps for owning customer / admin / assigned DJ (all 200) and other customer 404, DELETE /rsvps/{id}, and event stats rsvp aggregation (responses/attending_guests/declined/maybe). Frontend (Playwright on preview URL): customer jeroen@example.nl → Uitnodiging shows both PNG and PDF buttons; PDF download triggered with suggested filename 'uitnodiging-jeroen-mark.pdf' (.pdf). Tekst tab shows inv-rsvp-switch and inv-rsvp_deadline-input; save persists; share returns token; /u/<token> (unauthenticated) renders invitation + rsvp-form; empty submit shows rsvp-error 'Laat even weten of je komt.'; selecting yes + name + guests + message submits and reveals rsvp-success. Customer /event/<id>/gasten shows stats (3 Gasten komen, 1 Reactie, 0/0 misschien/komen niet), filter buttons, rsvp-search-input, rsvp-export-button, and the guest row. Dashboard card-guests updated to '3 gasten komen · 1 reacties · 0 misschien · 0 komen niet'. Admin event detail → admin-tab-guests renders the same guest-list including TEST_UI_Guest.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "InvitationBuilder PDF export", "issues": ["html-to-image emits a benign console SecurityError when inlining Google Fonts stylesheet (cross-origin). Final PDF still generated successfully, but console shows errors that could confuse debugging. Non-blocking."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_rsvp.py", "/app/backend/tests/backend_test.py", "/app/test_reports/pytest/rsvp_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routes/rsvp.py: no rate limiting on POST /public/invitations/{token}/rsvp — an attacker with a leaked share token can spam up to MAX_PER_EVENT (1000) rows. Consider per-IP/token rate-limit or captcha before launch.",
+    "routes/rsvp.py submit_rsvp passes body.model_dump() plus event_id into Rsvp(...) — works because Rsvp model has only those fields, but if InvitationFields/Rsvp drift this will raise. Minor.",
+    "InvitationBuilder.jsx downloadPdf uses toPng@pixelRatio 3 then embeds into jsPDF — large images (~2.5 MB per PDF) will be slow on mobile. Consider jpeg format or lower pixelRatio for mobile.",
+    "GuestList.jsx exportCsv does not include timestamp (created_at); minor but useful for couples to track order of replies.",
+    "PublicInvitation.jsx RsvpForm: guests input not reset to 1 when switching from yes→no→yes (because of `form.attending !== 'no'` hiding the field). Not a functional issue but UX could show 1 by default."
+  ],
+  "updated_files": ["/app/backend/tests/test_rsvp.py", "/app/test_reports/iteration_2.json"],
+  "success_rate": {"backend": "100% (14/14 new RSVP tests; prior 32/32 still passing)", "frontend": "100% of RSVP+PDF flows tested"},
+  "test_credentials": "see /app/memory/test_credentials.md",
+  "seed_data_creation": "Cleanup: dropped all docs in db.invitations and db.rsvps (test_database) after testing so the demo starts with invitation unsaved as instructed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "RSVP regression lives in /app/backend/tests/test_rsvp.py. Run with 'pytest -p no:xdist' (default pytest.ini enables xdist which splits classes across workers and breaks shared-fixture ordering for TestPublicRsvp→TestRsvpList). All data-testids used in review request are present and functional. Cross-origin console error from html-to-image (Google Fonts CSS rules) is informational only — PDF/PNG still render. No functional bugs observed.",
+  "rca of the issue": "N/A — all features work as specified."
+}
