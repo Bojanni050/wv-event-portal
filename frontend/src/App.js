@@ -7,6 +7,7 @@ import CustomerLayout from "@/components/wv/CustomerLayout";
 import AdminLayout from "@/components/wv/AdminLayout";
 import Login from "@/pages/Login";
 import Account from "@/pages/Account";
+import { ForgotPassword, ResetPassword } from "@/pages/PasswordReset";
 import RoleHome from "@/pages/RoleHome";
 import EventOverview from "@/pages/EventOverview";
 import PublicInvitation from "@/pages/PublicInvitation";
@@ -32,6 +33,8 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/wachtwoord-vergeten" element={<ForgotPassword />} />
+            <Route path="/wachtwoord-herstellen" element={<ResetPassword />} />
             <Route path="/u/:token" element={<PublicInvitation />} />
             <Route path="/" element={<ProtectedRoute><RoleHome /></ProtectedRoute>} />
             <Route path="/event/:eventId" element={<ProtectedRoute roles={["customer"]}><CustomerLayout /></ProtectedRoute>}>

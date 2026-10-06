@@ -40,6 +40,8 @@ async def ensure_user(email: str, password: str, name: str, role: str, **link) -
 async def create_indexes():
     await db.users.create_index("email", unique=True)
     await db.login_attempts.create_index("identifier")
+    await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
+    await db.password_reset_tokens.create_index("token_hash", unique=True)
     await db.customers.create_index("external_id", sparse=True)
     await db.events.create_index("external_id", sparse=True)
     await db.events.create_index([("customer_id", 1), ("date", 1)])

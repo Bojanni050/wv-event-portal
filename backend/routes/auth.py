@@ -1,13 +1,22 @@
+import hashlib
+import logging
+import os
+import re
+import secrets
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from core import (clear_auth_cookies, db, decode_token, get_current_user, hash_password, now, oid,
                   set_access_cookie, set_auth_cookies, verify_password)
+from mailer import reset_email_html, send_email
 from models import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+log = logging.getLogger(__name__)
+RESET_TTL = timedelta(hours=1)
+RESET_LIMIT_PER_HOUR = 3
 
 
 class LoginIn(BaseModel):
@@ -18,6 +27,19 @@ class LoginIn(BaseModel):
 class PasswordIn(BaseModel):
     current_password: str
     new_password: str
+
+
+class ForgotIn(BaseModel):
+    email: str = Field(max_length=200)
+
+
+class ResetIn(BaseModel):
+    token: str = Field(max_length=200)
+    new_password: str = Field(max_length=200)
+
+
+def _hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
 
 
 def client_ip(request: Request) -> str:
@@ -81,4 +103,47 @@ async def change_password(body: PasswordIn, user: dict = Depends(get_current_use
     if len(body.new_password) < 8:
         raise HTTPException(400, "Nieuw wachtwoord moet minimaal 8 tekens hebben")
     await db.users.update_one({"_id": doc["_id"]}, {"$set": {"password_hash": hash_password(body.new_password)}})
+    return {"ok": True}
+
+
+
+GENERIC_FORGOT = {"ok": True, "message": "Als dit e-mailadres bij ons bekend is, ontvang je binnen enkele minuten een e-mail."}
+
+
+@router.post("/forgot-password")
+async def forgot_password(body: ForgotIn):
+    email = body.email.strip().lower()
+    user = await db.users.find_one({"email": email})
+    if not user:
+        return GENERIC_FORGOT
+    recent = await db.password_reset_tokens.count_documents(
+        {"user_id": str(user["_id"]), "created_at": {"$gt": now() - timedelta(hours=1)}})
+    if recent >= RESET_LIMIT_PER_HOUR:
+        return GENERIC_FORGOT
+    token = secrets.token_urlsafe(32)
+    await db.password_reset_tokens.insert_one({
+        "user_id": str(user["_id"]), "token_hash": _hash_token(token), "used": False,
+        "created_at": now(), "expires_at": now() + RESET_TTL})
+    link = f"{os.environ['FRONTEND_URL'].rstrip('/')}/wachtwoord-herstellen?token={token}"
+    try:
+        await send_email(to=email, subject="Stel een nieuw wachtwoord in voor White Vision",
+                         html=reset_email_html(user["name"], link))
+    except Exception as e:
+        log.error("Reset email failed for user %s: %s", user["_id"], e)
+    return GENERIC_FORGOT
+
+
+@router.post("/reset-password")
+async def reset_password(body: ResetIn):
+    if len(body.new_password) < 8:
+        raise HTTPException(400, "Nieuw wachtwoord moet minimaal 8 tekens hebben")
+    doc = await db.password_reset_tokens.find_one({"token_hash": _hash_token(body.token)})
+    if not doc or doc["used"] or doc["expires_at"] < now():
+        raise HTTPException(400, "Deze link is ongeldig of verlopen. Vraag een nieuwe aan.")
+    user = await db.users.find_one({"_id": oid(doc["user_id"])})
+    if not user:
+        raise HTTPException(400, "Deze link is ongeldig of verlopen. Vraag een nieuwe aan.")
+    await db.users.update_one({"_id": user["_id"]}, {"$set": {"password_hash": hash_password(body.new_password)}})
+    await db.password_reset_tokens.update_many({"user_id": doc["user_id"]}, {"$set": {"used": True}})
+    await db.login_attempts.delete_many({"identifier": {"$regex": f":{re.escape(user['email'])}$"}})
     return {"ok": True}

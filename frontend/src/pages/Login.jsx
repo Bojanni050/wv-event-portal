@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/wv/Logo";
@@ -59,7 +59,7 @@ export default function Login() {
             <Field label="E-mailadres">
               <Input data-testid="login-email-input" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="wv-input h-12" placeholder="naam@voorbeeld.nl" />
             </Field>
-            <Field label="Wachtwoord">
+            <Field label={<span className="flex items-center justify-between">Wachtwoord<Link to="/wachtwoord-vergeten" className="normal-case tracking-normal text-[#E5C158] hover:text-white" data-testid="forgot-password-link">Wachtwoord vergeten?</Link></span>}>
               <Input data-testid="login-password-input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} className="wv-input h-12" />
             </Field>
           </div>
