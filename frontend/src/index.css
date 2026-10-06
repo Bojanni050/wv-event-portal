@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Syne:wght@500;700;800&family=Italiana&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 240 10% 3.9%;
+        --foreground: 240 5% 96%;
+        --card: 240 6% 7%;
+        --card-foreground: 240 5% 96%;
+        --popover: 240 6% 8%;
+        --popover-foreground: 240 5% 96%;
+        --primary: 46 65% 52%;
+        --primary-foreground: 240 10% 4%;
+        --secondary: 240 4% 14%;
+        --secondary-foreground: 240 5% 96%;
+        --muted: 240 4% 14%;
+        --muted-foreground: 240 5% 62%;
+        --accent: 240 4% 14%;
+        --accent-foreground: 240 5% 96%;
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 4% 15%;
+        --input: 240 4% 18%;
+        --ring: 46 65% 52%;
+        --radius: 0.25rem;
+        --gold: #D4AF37;
+    }
+}
+
+@layer base {
+    * { @apply border-border; }
+    html { color-scheme: dark; }
+    body {
+        @apply bg-background text-foreground;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        margin: 0;
+    }
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 60;
+        opacity: 0.035;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    ::selection { background: rgba(212, 175, 55, 0.35); color: #fff; }
+}
+
+@layer components {
+    .font-display { font-family: 'Cormorant Garamond', serif; }
+    .wv-eyebrow {
+        @apply text-[11px] font-semibold uppercase tracking-[0.28em];
+        color: rgba(212, 175, 55, 0.9);
+    }
+    .wv-panel {
+        @apply border border-white/[0.07] bg-[#111114];
+        border-radius: 2px;
+    }
+    .wv-hover {
+        transition: border-color 300ms ease, background-color 300ms ease, transform 300ms ease;
+    }
+    .wv-hover:hover { border-color: rgba(212, 175, 55, 0.35); background-color: #141418; }
+    .wv-input {
+        @apply bg-[#0c0c0f] border-white/10 rounded-sm focus-visible:ring-1 focus-visible:ring-[#D4AF37]/60;
+    }
+    .wv-btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#D4AF37] px-5 py-2.5 text-sm font-semibold text-black;
+        transition: background-color 200ms ease, transform 200ms ease;
+    }
+    .wv-btn:hover { background-color: #E5C158; }
+    .wv-btn:active { transform: scale(0.97); }
+    .wv-btn:disabled { opacity: 0.5; pointer-events: none; }
+    .wv-btn-ghost {
+        @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-zinc-200;
+        transition: border-color 200ms ease, color 200ms ease, background-color 200ms ease;
+    }
+    .wv-btn-ghost:hover { border-color: rgba(212, 175, 55, 0.6); color: #fff; background-color: rgba(255,255,255,0.03); }
+}
+
+@keyframes wv-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.wv-rise { animation: wv-rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.wv-d1 { animation-delay: 80ms; }
+.wv-d2 { animation-delay: 160ms; }
+.wv-d3 { animation-delay: 240ms; }
+.wv-d4 { animation-delay: 320ms; }
+.wv-d5 { animation-delay: 400ms; }
+
+@keyframes wv-kenburns {
+    from { transform: scale(1.04); }
+    to { transform: scale(1.12); }
+}
+.wv-kenburns { animation: wv-kenburns 24s ease-in-out infinite alternate; }
+
+.wv-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.wv-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }

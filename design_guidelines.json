@@ -1,0 +1,175 @@
+{
+  "project_name": "White Vision Customer Portal & Admin Dashboard",
+  "domain": "app.white-vision.nl",
+  "language": "Dutch (Nederlands)",
+  "emotional_tone": "Exclusief, stijlvol, modern, sfeervol, betrouwbaar en feestelijk. Het gevoel: 'Dit is míjn event, en White Vision maakt het onvergetelijk.'",
+  "app_type": "hybrid_fullstack",
+  "typography": {
+    "headings": {
+      "font_family": "Plus Jakarta Sans, Syne, sans-serif",
+      "h1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight",
+      "h2": "text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight",
+      "h3": "text-lg sm:text-xl font-semibold",
+      "h4": "text-base font-semibold",
+      "overline": "text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/90"
+    },
+    "body": {
+      "font_family": "Plus Jakarta Sans, sans-serif",
+      "standard": "text-sm sm:text-base text-zinc-300 leading-relaxed",
+      "small": "text-xs text-zinc-400"
+    },
+    "invitation_templates_fonts": [
+      {
+        "name": "Luxury Serif",
+        "value": "Playfair Display, serif"
+      },
+      {
+        "name": "Modern Swiss",
+        "value": "Plus Jakarta Sans, sans-serif"
+      },
+      {
+        "name": "Festival Grotesk",
+        "value": "Syne, sans-serif"
+      },
+      {
+        "name": "Romantic Script",
+        "value": "Cormorant Garamond, serif"
+      }
+    ]
+  },
+  "colors": {
+    "theme": "Dark Velvet Luxury with Gold/Amber Accents (Optional Light Mode toggle)",
+    "palette": {
+      "background_dark": "#09090B",
+      "surface_dark": "#121215",
+      "card_dark": "#18181B",
+      "border_dark": "rgba(255, 255, 255, 0.08)",
+      "accent_gold": "#D4AF37",
+      "accent_gold_glow": "#E5C158",
+      "accent_gold_subtle": "rgba(212, 175, 55, 0.15)",
+      "primary_text": "#F4F4F5",
+      "secondary_text": "#A1A1AA",
+      "muted_text": "#71717A",
+      "success": "#22C55E",
+      "warning": "#F59E0B",
+      "danger": "#EF4444",
+      "chat_bubble_customer": "#27272A",
+      "chat_bubble_dj": "#D4AF37"
+    }
+  },
+  "layout_and_spacing": {
+    "philosophy": "Ruime typografie met ademruimte, asymmetrische kaarten en duidelijke visuele hiërarchie.",
+    "container_padding": "p-4 sm:p-6 lg:p-8",
+    "grid_gap": "gap-4 sm:gap-6 lg:gap-8",
+    "cards": "Subtiele border (1px border-white/10), afgeronde hoeken (rounded-2xl), diepe achtergrond (#18181B) met zachte hover shadow.",
+    "glassmorphic_headers": "backdrop-blur-xl bg-zinc-950/80 border-b border-white/10"
+  },
+  "key_features_architecture": [
+    {
+      "feature": "Login Screen",
+      "description": "Luxe White Vision branded inlogscherm met sfeerbeeld, rolselectie (Klant vs Admin fast-switch voor demo), e-mail/wachtwoord inlog en meertaligheidsknop (NL/EN)."
+    },
+    {
+      "feature": "Event Status Dashboard",
+      "description": "Direct inzicht: 'Jeroen & Mark — Bruiloft · 14 juni 2027', countdown klok, 68% gereed voortgangsbalk met gedetailleerde stap-per-stap checklist."
+    },
+    {
+      "feature": "Chat met DJ (WhatsApp / iMessage Vibe)",
+      "description": "Direct contact met de toegewezen DJ (bijv. DJ Thomas van White Vision). Met tijdstempels, gelezen-status, bijlagen en een bovenaan vastgepind vak 'Belangrijke Afspraken'."
+    },
+    {
+      "feature": "Muziekvoorkeuren Management",
+      "description": "Interactieve muzieklijsten: Must Play, Don't Play, Favorieten, en Speciale Momenten (Binnenkomst, Openingsdans, Taart snijden, Eerste dans, Slotnummer). Inclusief Spotify/YouTube zoeksimulator en genres-schuifbalken."
+    },
+    {
+      "feature": "Visueel Draaischema & Tijdlijn",
+      "description": "Tijdlijnkaart met pictogrammen en tijden (bijv. 19:30 Ontvangst gasten -> 20:30 Openingsdans -> 22:00 Party Peak -> 01:00 Einde). Beheersbaar en exporteerbaar als PDF."
+    },
+    {
+      "feature": "Canva-achtige Uitnodiging Maker",
+      "description": "Visual drag-and-edit builder met 5 preset sjablonen (Goud Luxe, Minimalistisch Zwart/Wit, Bohemian Chic, Festival Vibes, Romantisch). Aanpasbare teksten, kleuren, typografie, foto's, live preview en deelknop."
+    },
+    {
+      "feature": "Bestanden & Documenten",
+      "description": "Veilige opslag per event: Offerte PDF, Contract, Draaiboek, Sfeerborden en foto's uploaden voor de DJ."
+    },
+    {
+      "feature": "White Vision Admin Interface",
+      "description": "Volledig beheerdashboard voor White Vision team: klanten & events aanmaken, DJ's toewijzen, ongelezen berichten inzien, status en voortgang van al de events monitoren en sjablonen beheren."
+    }
+  ],
+  "invitation_templates": [
+    {
+      "id": "template_1",
+      "name": "Goud & Nightclub Elegance",
+      "style": "Dark Gold Metallic",
+      "background": "#09090B",
+      "text_color": "#D4AF37",
+      "accent_color": "#FFFFFF",
+      "font_family": "Playfair Display, serif",
+      "sample_image": "https://images.unsplash.com/photo-1596485952606-35cd3df9f3e8?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    {
+      "id": "template_2",
+      "name": "Strak Dutch Minimal",
+      "style": "Swiss Monochrome",
+      "background": "#FAFAFA",
+      "text_color": "#09090B",
+      "accent_color": "#52525B",
+      "font_family": "Plus Jakarta Sans, sans-serif",
+      "sample_image": "https://images.unsplash.com/photo-1768777272462-20dc1e62bb9b?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    {
+      "id": "template_3",
+      "name": "Bohemian Sunset",
+      "style": "Warm Terracotta & Sage",
+      "background": "#2A1E1A",
+      "text_color": "#E5C158",
+      "accent_color": "#F3E8EE",
+      "font_family": "Cormorant Garamond, serif",
+      "sample_image": "https://images.unsplash.com/photo-1653821355736-0c2598d0a63e?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    {
+      "id": "template_4",
+      "name": "Festival Party Neon",
+      "style": "High-Energy Electric",
+      "background": "#0F0B1E",
+      "text_color": "#00F0FF",
+      "accent_color": "#FF007A",
+      "font_family": "Syne, sans-serif",
+      "sample_image": "https://images.unsplash.com/photo-1574155376612-bfa4ed8aabfd?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    {
+      "id": "template_5",
+      "name": "Klassiek Romantisch",
+      "style": "Ivory Gold Fine Art",
+      "background": "#FDFBF7",
+      "text_color": "#1C1917",
+      "accent_color": "#B45309",
+      "font_family": "Playfair Display, serif",
+      "sample_image": "https://images.unsplash.com/photo-1481841580057-e2b9927a05c6?crop=entropy&cs=srgb&fm=jpg&q=85"
+    }
+  ],
+  "image_urls": {
+    "login_hero": "https://images.unsplash.com/photo-1596485952606-35cd3df9f3e8?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "event_party": "https://images.unsplash.com/photo-1574155376612-bfa4ed8aabfd?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "venue_tables": "https://images.unsplash.com/photo-1653821355736-0c2598d0a63e?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "couple_dance": "https://images.unsplash.com/photo-1768777272462-20dc1e62bb9b?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "stage_lights": "https://images.unsplash.com/photo-1618853802485-be85de3d160f?crop=entropy&cs=srgb&fm=jpg&q=85"
+  },
+  "instructions_to_main_agent": [
+    "Gebruik Nederlandse interface-teksten (bijv. 'Mijn Event', 'Draaischema', 'Muziekvoorkeuren', 'Chat met DJ', 'Uitnodiging Maker').",
+    "Zorg dat alle interactieve elementen voorzien zijn van unieke data-testid attributen (bijv. data-testid='chat-send-button', data-testid='tab-music').",
+    "Zorg voor een snelle wisselknop op het inlogscherm tussen Klant (Jeroen & Mark) en Admin (White Vision Beheer) zodat beide interfaces direct getest en gedemonstreerd kunnen worden.",
+    "Implementeer de Canva-achtige uitnodiging builder met live preview op canvas en directe updates bij tekst- of kleuraanpassingen.",
+    "Bied zowel Klant- als Admin-functionaliteiten volledig werkend aan met dynamische mockdata in React (state management)."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "Do NOT apply universal transitions like transition: all. Use specific transition properties.",
+    "Do NOT center align the app container text.",
+    "All interactive elements MUST include data-testid attribute in kebab-case."
+  ]
+}
