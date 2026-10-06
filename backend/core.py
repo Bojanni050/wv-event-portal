@@ -149,7 +149,7 @@ async def get_event_for(user: dict, event_id: str) -> dict:
     ev = await db.events.find_one({"_id": oid(event_id), **event_scope(user)})
     if not ev:
         raise HTTPException(404, "Event niet gevonden")
-    return ev
+    return dict(ev)
 
 
 async def get_child_for(user: dict, collection: str, item_id: str) -> dict:
@@ -157,7 +157,7 @@ async def get_child_for(user: dict, collection: str, item_id: str) -> dict:
     if not doc:
         raise HTTPException(404, "Niet gevonden")
     await get_event_for(user, doc["event_id"])
-    return doc
+    return dict(doc)
 
 
 def unread_filter(user: dict) -> dict:

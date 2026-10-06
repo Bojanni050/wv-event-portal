@@ -1,0 +1,29 @@
+# White Vision Event Portal — PRD
+
+## Original problem statement
+Build a modern, premium customer portal for White Vision, a Dutch professional DJ and event entertainment company (standalone app, future app.white-vision.nl, separate from WordPress). Every customer gets a personal event environment: dashboard with progress ("Your event is 68% ready"), My Event, Talk to your DJ (WhatsApp-like chat with timestamps, read/unread, attachments, notifications, pinned agreements), Music (Must Play, Don't Play, Favorites, Special moments), Timeline (customer suggests, staff manages definitive), Invitation builder (templates, photo, colors, typography, layout; preview, save, share, export PNG/PDF), Files. Separate White Vision admin: create customers/events, assign DJs, status, messages, timelines, music, files, invitation templates; dashboard with upcoming, attention, unread, incomplete, recent. Statuses New/Preparing/Ready/Completed + % progress. Premium, elegant, not CRM-like; desktop + mobile. API designed so WordPress can later create/update customers & events. Future: Spotify, email, WhatsApp, RSVP, payments, multiple DJs, gallery, AI, reminders.
+
+User choices: Dutch UI; email+password login; files stored in database; React+FastAPI+MongoDB accepted (instead of PostgreSQL/TypeScript); seed demo data.
+
+## Architecture
+- Backend FastAPI (modular): core.py (db, GridFS, JWT cookie auth, role registry, event scoping), models.py (Pydantic BaseDocument models), services.py (progress/stats), routes/{auth, events, messages, music, timeline, files, invitations, admin, integrations}.py, seed.py
+- Collections: users, customers, djs, events, messages, music_items (external_ref for Spotify), timeline_items, files (+GridFS event_files), invitations, invitation_templates, login_attempts
+- Roles: customer, dj (assigned events only), admin (all). STAFF_ROLES in core.py
+- WordPress: POST /api/integrations/wordpress/sync (X-API-Key = WP_API_KEY) upserts customer+event by external_id
+- Frontend React (JS) + Tailwind + shadcn; dark velvet + gold; Cormorant Garamond + Plus Jakarta Sans. Shared feature modules used by customer and admin views. Public invitation page /u/:token
+
+## Implemented (2026-10-06)
+- Auth (login/logout/me/refresh/password change, brute-force lockout), no public signup
+- Customer dashboard with hero, countdown, progress breakdown, 6 cards
+- Event details with customer-editable vs staff-only fields
+- Chat with polling, read receipts, attachments, pin → "Belangrijke afspraken", notification bell
+- Music lists + 5 special moments + search
+- Timeline with suggest/confirm flow
+- Invitation builder: 5 templates, 4 layouts, 5 fonts, palettes/colors, photo upload, save, share link, PNG export
+- Files (GridFS) with categories and filters
+- Admin: overview, events (search/filter/create/detail tabs/status/delete), customers & DJs (optional login), templates CRUD
+- Tested: 32/32 backend tests, frontend smoke flows
+
+## Backlog
+- P1: PDF export of invitation; DELETE DJ endpoint; forgot-password via email (needs email provider); tighten CORS_ORIGINS to production domain
+- P2: Spotify search, email/WhatsApp notifications, RSVP/guest management, payments/deposit status, multiple DJs, photo gallery, AI planning, reminders, TypeScript migration

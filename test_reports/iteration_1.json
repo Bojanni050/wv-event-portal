@@ -1,0 +1,22 @@
+{
+  "summary": "First-run full e2e testing. Backend: 32/32 pytest cases pass across auth, RBAC/scope (customer/DJ/admin), events (locked fields, 403 on date), messages (send/pin/read/notifications), music CRUD, timeline (suggest/confirm/403 on confirmed), files (upload + staff file 403), invitations (templates visibility by role + public share by token), admin overview, create-customer-with-login, WordPress sync (401 on wrong key, upsert idempotency). Frontend smoke: customer login lands on /event/<id> showing 'Jeroen & Mark', 'Bruiloft · 14 juni 2027', 85% progress, 6 cards; wrong password shows Dutch error 'Onjuist e-mailadres of wachtwoord'; customer navigating to /admin is redirected back to event page; admin login reaches /admin dashboard with counts (3 upcoming / 2 attention / 0 unread / 1 incomplete) and lists; mobile viewport (390px) renders event dashboard & chat cleanly, message send works with read-check indicator.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "CORS_ORIGINS='*' is set in backend/.env while allow_credentials=True — Starlette will send Access-Control-Allow-Origin: *, which browsers reject for credentialed cross-origin requests. Currently works because frontend uses same-origin via ingress, but should be tightened to the actual frontend origin for defense-in-depth and future deployments.",
+    "login brute-force lockout keeps extending locked_until on every failed attempt even after count>=5; combined with 'count>=5 and locked_until>now()' this means repeated failures effectively prolong the lockout indefinitely instead of a fixed 15 min window. Minor UX issue.",
+    "routes/invitations.py public_invitation_photo bypasses scope — any caller with the share token can also fetch the photo; this is intended but note no rate-limit.",
+    "test_create_dj in backend_test wasn't able to clean up a created TEST_DJ via API (no DELETE /djs endpoint); cleaned via DB. Consider adding DELETE /djs/{id} for admin UI parity.",
+    "events DELETE cascades but does NOT remove the users row linked to the customer; may leave orphan user accounts when deleting customers (delete_customer deletes users where customer_id=... which is good; but delete_event does not touch users — fine). No change needed."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py", "/app/backend/tests/__init__.py"],
+  "success_rate": {"backend": "100% (32/32)", "frontend": "100% of smoke flows tested"},
+  "test_credentials": "see /app/memory/test_credentials.md (used admin bojan.vanderheide@gmail.com, customer jeroen@example.nl, DJ bas@white-vision.nl, all Demo!2027)",
+  "seed_data_creation": "No persistent seed data added. All TEST_* records cleaned up via API in test teardown and a final mongosh sweep removed any residuals (messages, djs, customers, events, music_items, timeline_items, invitation_templates, test users).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend pytest suite at /app/backend/tests/backend_test.py exercises all critical API flows and RBAC. The admin, DJ (bas/thomas), and two customer accounts are confirmed functional. WP_API_KEY lives in backend/.env (currently wWMOJEud8qmODhJgNvbNdx8r77c_xWd3). Avoid >=5 bad logins per ip+email for seeded accounts (15-min lockout). Frontend data-testids match what's declared in the review request. Not fully exercised in the browser: invitation builder (templates/photo/share link rendering with uploaded photo), file filters UI, music special-moment dialog, timeline add-via-UI; backend API coverage for these is in place. If UI-side testing of those is needed, use the data-testids inv-*, timeline-*, moment-*, files-filter-*.",
+  "rca of the issue": "No bugs found."
+}

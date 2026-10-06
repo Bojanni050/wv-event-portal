@@ -38,9 +38,11 @@ async def login(body: LoginIn, request: Request, response: Response):
         await db.login_attempts.delete_one({"identifier": ident})
     user = await db.users.find_one({"email": email})
     if not user or not verify_password(body.password, user["password_hash"]):
-        await db.login_attempts.update_one(
-            {"identifier": ident},
-            {"$inc": {"count": 1}, "$set": {"locked_until": now() + timedelta(minutes=15)}}, upsert=True)
+        updated = await db.login_attempts.find_one_and_update(
+            {"identifier": ident}, {"$inc": {"count": 1}}, upsert=True, return_document=True)
+        if updated["count"] == 5:
+            await db.login_attempts.update_one(
+                {"identifier": ident}, {"$set": {"locked_until": now() + timedelta(minutes=15)}})
         raise HTTPException(401, "Onjuist e-mailadres of wachtwoord")
     await db.login_attempts.delete_one({"identifier": ident})
     set_auth_cookies(response, str(user["_id"]), email)
