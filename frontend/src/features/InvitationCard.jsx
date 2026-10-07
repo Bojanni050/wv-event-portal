@@ -1,6 +1,35 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { FONTS } from "@/lib/constants";
 
 const fs = (n) => ({ fontSize: `${n}cqw` });
+
+// Title that shrinks when its longest word is wider than the card (e.g. "JEROEN" in Syne 800 caps).
+// Sizes stay in cqw, so the result scales with the card; we only measure once per title/font/layout.
+function Title({ inv, base, style }) {
+  const ref = useRef(null);
+  const [size, setSize] = useState(base);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    let alive = true;
+    const fit = () => {
+      if (!alive) return;
+      el.style.fontSize = `${base}cqw`;
+      const ratio = el.scrollWidth > el.clientWidth ? el.clientWidth / el.scrollWidth : 1;
+      const next = ratio < 1 ? Math.max(base * ratio * 0.97, base * 0.3) : base;
+      el.style.fontSize = `${next}cqw`;
+      setSize(next);
+    };
+    fit();
+    document.fonts?.ready.then(fit);
+    document.fonts?.addEventListener?.("loadingdone", fit);
+    return () => {
+      alive = false;
+      document.fonts?.removeEventListener?.("loadingdone", fit);
+    };
+  }, [base, inv.title, inv.font, inv.layout]);
+  return <h1 ref={ref} style={{ ...style, fontSize: `${size}cqw` }}>{inv.title}</h1>;
+}
 
 function Details({ inv, align = "center" }) {
   return (
@@ -27,7 +56,7 @@ function Classic({ inv, photo }) {
         </div>
       )}
       <Sub inv={inv} />
-      <h1 style={{ ...fs(11), lineHeight: 1, margin: "3cqw 0", textAlign: "center" }}>{inv.title}</h1>
+      <Title inv={inv} base={11} style={{ lineHeight: 1, margin: "3cqw 0", textAlign: "center", alignSelf: "stretch" }} />
       <div style={{ width: "12%", height: 1, background: inv.accent_color, marginBottom: "4cqw" }} />
       <Details inv={inv} />
       <Desc inv={inv} align="center" />
@@ -42,7 +71,7 @@ function Poster({ inv, photo }) {
       <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${inv.background_color} 22%, ${inv.background_color}99 55%, transparent)` }} />
       <div className="absolute inset-x-0 bottom-0" style={{ padding: "8%" }}>
         <Sub inv={inv} />
-        <h1 style={{ ...fs(15), lineHeight: 0.9, margin: "2cqw 0 5cqw", textTransform: "uppercase", fontWeight: 800 }}>{inv.title}</h1>
+        <Title inv={inv} base={15} style={{ lineHeight: 0.9, margin: "2cqw 0 5cqw", textTransform: "uppercase", fontWeight: 800 }} />
         <div style={{ borderTop: `2px solid ${inv.accent_color}`, paddingTop: "4cqw" }}><Details inv={inv} align="left" /></div>
         <Desc inv={inv} align="left" />
       </div>
@@ -58,7 +87,7 @@ function Split({ inv, photo }) {
       </div>
       <div className="flex flex-col justify-center" style={{ padding: "8%" }}>
         <Sub inv={inv} />
-        <h1 style={{ ...fs(8.5), lineHeight: 1, margin: "3cqw 0 5cqw" }}>{inv.title}</h1>
+        <Title inv={inv} base={8.5} style={{ lineHeight: 1, margin: "3cqw 0 5cqw" }} />
         <Details inv={inv} align="left" />
         <Desc inv={inv} align="left" />
       </div>
@@ -71,7 +100,7 @@ function Minimal({ inv }) {
     <div className="absolute inset-0 flex flex-col justify-between" style={{ padding: "9%" }}>
       <div>
         <p style={{ ...fs(2.6), letterSpacing: "0.35em", textTransform: "uppercase", color: inv.accent_color }}>{inv.subtitle}</p>
-        <h1 style={{ ...fs(14), lineHeight: 0.95, marginTop: "5cqw", fontWeight: 700, letterSpacing: "-0.03em" }}>{inv.title}</h1>
+        <Title inv={inv} base={14} style={{ lineHeight: 0.95, marginTop: "5cqw", fontWeight: 700, letterSpacing: "-0.03em" }} />
       </div>
       <div>
         <div style={{ height: 2, background: inv.text_color, marginBottom: "5cqw" }} />
