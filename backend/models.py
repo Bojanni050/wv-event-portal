@@ -20,6 +20,7 @@ from sqlalchemy import (
     LargeBinary,
     String,
     Text,
+    func,
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -241,6 +242,8 @@ class LoginAttempt(Base):
     identifier: Mapped[str] = mapped_column(String(320), index=True, nullable=False)
     count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     locked_until: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow,
+                                                 server_default=func.now())
 
 
 class PasswordResetToken(Base):

@@ -2,12 +2,13 @@ import logging
 import os
 from datetime import date, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core import hash_password, now, to_uuid, verify_password
+from core import hash_password, now, to_uuid
 from database import SessionLocal
-from models import Customer, DJ, Event, InvitationTemplate, Message, MusicItem, TimelineItem, User
+from models import (Customer, DJ, Event, InvitationTemplate, LoginAttempt, Message, MusicItem,
+                    PasswordResetToken, TimelineItem, User)
 
 log = logging.getLogger("seed")
 
@@ -30,17 +31,27 @@ TEMPLATES = [
 ]
 
 
+def _demo_seed_enabled() -> bool:
+    return os.environ.get("SEED_DEMO", "false").strip().lower() in {"1", "true", "yes", "on"}
+
+
 async def ensure_user(session: AsyncSession, email: str, password: str, name: str, role: str, **link) -> str:
+    """Create the user if it does not exist. Never overwrites an existing password."""
     email = email.lower()
     existing = await session.scalar(select(User).where(User.email == email))
-    if existing is None:
-        user = User(email=email, name=name, role=role, created_at=now(), password_hash=hash_password(password), **link)
-        session.add(user)
+    if existing is not None:
+        return str(existing.id)
+    user = User(email=email, name=name, role=role, created_at=now(), password_hash=hash_password(password), **link)
+    session.add(user)
+    await session.flush()
+    return str(user.id)
+
+
+async def ensure_templates(session: AsyncSession):
+    """Reference data: the invitation templates every event can use."""
+    if not await session.scalar(select(func.count()).select_from(InvitationTemplate)):
+        session.add_all([InvitationTemplate(**t, active=True, created_at=now()) for t in TEMPLATES])
         await session.flush()
-        return str(user.id)
-    if not verify_password(password, existing.password_hash):
-        existing.password_hash = hash_password(password)
-    return str(existing.id)
 
 
 async def add_person(session: AsyncSession, model, role: str, link_key: str, data: dict, password=None) -> str:
@@ -54,13 +65,16 @@ async def add_person(session: AsyncSession, model, role: str, link_key: str, dat
     return pid
 
 
+async def cleanup_expired(session: AsyncSession):
+    """Drop expired password-reset tokens and stale login-attempt rows."""
+    await session.execute(delete(PasswordResetToken).where(PasswordResetToken.expires_at < now()))
+    await session.execute(delete(LoginAttempt).where(LoginAttempt.updated_at < now() - timedelta(days=1)))
+
+
 async def seed_demo(session: AsyncSession):
-    pw = os.environ["DEMO_PASSWORD"]
-    if not await session.scalar(select(func.count()).select_from(InvitationTemplate)):
-        session.add_all([InvitationTemplate(**t, active=True, created_at=now()) for t in TEMPLATES])
-        await session.flush()
     if await session.scalar(select(func.count()).select_from(Event)):
         return
+    pw = os.environ["DEMO_PASSWORD"]  # only required when SEED_DEMO is on
 
     bas = await add_person(session, DJ, "dj", "dj_id", {
         "name": "Bas", "email": "bas@white-vision.nl", "phone": "06 00000001",
@@ -143,6 +157,12 @@ async def seed_demo(session: AsyncSession):
 
 async def run_seed():
     async with SessionLocal() as session:
-        await ensure_user(session, os.environ["ADMIN_EMAIL"], os.environ["ADMIN_PASSWORD"], "White Vision", "admin")
-        await seed_demo(session)
+        # Bootstrap admin + reference data on every start; both are idempotent.
+        await ensure_user(session, os.environ["ADMIN_EMAIL"], os.environ["ADMIN_PASSWORD"],
+                          "White Vision", "admin")
+        await ensure_templates(session)
+        await cleanup_expired(session)
+        # Demo customers/events are opt-in and never seeded in production.
+        if _demo_seed_enabled():
+            await seed_demo(session)
         await session.commit()
