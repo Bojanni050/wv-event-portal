@@ -1,8 +1,13 @@
 import logging
 import os
-from datetime import timedelta
+from datetime import date, timedelta
 
-from core import db, hash_password, now, verify_password
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core import hash_password, now, to_uuid, verify_password
+from database import SessionLocal
+from models import Customer, DJ, Event, InvitationTemplate, Message, MusicItem, TimelineItem, User
 
 log = logging.getLogger("seed")
 
@@ -25,73 +30,62 @@ TEMPLATES = [
 ]
 
 
-async def ensure_user(email: str, password: str, name: str, role: str, **link) -> str:
+async def ensure_user(session: AsyncSession, email: str, password: str, name: str, role: str, **link) -> str:
     email = email.lower()
-    existing = await db.users.find_one({"email": email})
+    existing = await session.scalar(select(User).where(User.email == email))
     if existing is None:
-        res = await db.users.insert_one({"email": email, "name": name, "role": role, "created_at": now(),
-                                         "password_hash": hash_password(password), **link})
-        return str(res.inserted_id)
-    if not verify_password(password, existing["password_hash"]):
-        await db.users.update_one({"_id": existing["_id"]}, {"$set": {"password_hash": hash_password(password)}})
-    return str(existing["_id"])
+        user = User(email=email, name=name, role=role, created_at=now(), password_hash=hash_password(password), **link)
+        session.add(user)
+        await session.flush()
+        return str(user.id)
+    if not verify_password(password, existing.password_hash):
+        existing.password_hash = hash_password(password)
+    return str(existing.id)
 
 
-async def create_indexes():
-    await db.users.create_index("email", unique=True)
-    await db.login_attempts.create_index("identifier")
-    await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
-    await db.password_reset_tokens.create_index("token_hash", unique=True)
-    await db.customers.create_index("external_id", sparse=True)
-    await db.events.create_index("external_id", sparse=True)
-    await db.events.create_index([("customer_id", 1), ("date", 1)])
-    await db.events.create_index("dj_id")
-    await db.messages.create_index([("event_id", 1), ("created_at", 1)])
-    for col in ("music_items", "timeline_items", "files", "rsvps"):
-        await db[col].create_index("event_id")
-    await db.invitations.create_index("event_id", unique=True)
-    await db.invitations.create_index("share_token", sparse=True)
-
-
-async def add_person(collection: str, role: str, link_key: str, data: dict, password=None) -> str:
-    res = await db[collection].insert_one({**data, "created_at": now()})
-    pid = str(res.inserted_id)
+async def add_person(session: AsyncSession, model, role: str, link_key: str, data: dict, password=None) -> str:
+    person = model(**data, created_at=now())
+    session.add(person)
+    await session.flush()
+    pid = str(person.id)
     if password and data.get("email"):
-        uid = await ensure_user(data["email"], password, data["name"], role, **{link_key: pid})
-        await db[collection].update_one({"_id": res.inserted_id}, {"$set": {"user_id": uid}})
+        uid = await ensure_user(session, data["email"], password, data["name"], role, **{link_key: person.id})
+        person.user_id = to_uuid(uid)
     return pid
 
 
-async def seed_demo():
+async def seed_demo(session: AsyncSession):
     pw = os.environ["DEMO_PASSWORD"]
-    if not await db.invitation_templates.count_documents({}):
-        await db.invitation_templates.insert_many([{**t, "active": True, "created_at": now()} for t in TEMPLATES])
-    if await db.events.count_documents({}):
+    if not await session.scalar(select(func.count()).select_from(InvitationTemplate)):
+        session.add_all([InvitationTemplate(**t, active=True, created_at=now()) for t in TEMPLATES])
+        await session.flush()
+    if await session.scalar(select(func.count()).select_from(Event)):
         return
 
-    bas = await add_person("djs", "dj", "dj_id", {
+    bas = await add_person(session, DJ, "dj", "dj_id", {
         "name": "Bas", "email": "bas@white-vision.nl", "phone": "06 00000001",
         "bio": "Bruiloften en feesten met een volle dansvloer. Van Motown tot moderne house."}, pw)
-    thomas = await add_person("djs", "dj", "dj_id", {
+    thomas = await add_person(session, DJ, "dj", "dj_id", {
         "name": "Thomas", "email": "thomas@white-vision.nl", "phone": "06 00000002",
         "bio": "Allround DJ voor bedrijfsfeesten en verjaardagen."}, pw)
-    jm = await add_person("customers", "customer", "customer_id", {
+    jm = await add_person(session, Customer, "customer", "customer_id", {
         "name": "Jeroen & Mark", "email": "jeroen@example.nl", "phone": "06 00000010"}, pw)
-    sanne = await add_person("customers", "customer", "customer_id", {
+    sanne = await add_person(session, Customer, "customer", "customer_id", {
         "name": "Sanne de Vries", "email": "sanne@example.nl", "phone": "06 00000011"}, pw)
-    vandijk = await add_person("customers", "customer", "customer_id", {
+    vandijk = await add_person(session, Customer, "customer", "customer_id", {
         "name": "Van Dijk Techniek", "email": "events@example.nl"})
 
     t0 = now()
-    res = await db.events.insert_one({
-        "title": "Jeroen & Mark", "event_type": "wedding", "date": "2027-06-14", "start_time": "20:00",
-        "end_time": "01:00", "venue_name": "Landgoed De Wilmersberg", "venue_city": "De Lutte",
-        "venue_address": None, "venue_notes": "Feestavond in de grote zaal.", "guest_count": 140,
-        "notes": "Avondprogramma na de ceremonie. Graag een mix van feelgood classics en moderne hits.",
-        "customer_id": jm, "dj_id": bas, "status": "preparing", "contact_name": "Lisa (ceremoniemeester)",
-        "contact_phone": "06 00000020", "setup_notes": None, "cover_image": "/images/reception.jpg",
-        "created_at": t0 - timedelta(days=30), "updated_at": t0})
-    ev = str(res.inserted_id)
+    event = Event(
+        title="Jeroen & Mark", event_type="wedding", date=date(2027, 6, 14), start_time="20:00", end_time="01:00",
+        venue_name="Landgoed De Wilmersberg", venue_city="De Lutte", venue_notes="Feestavond in de grote zaal.",
+        guest_count=140, notes="Avondprogramma na de ceremonie. Graag een mix van feelgood classics en moderne hits.",
+        customer_id=jm, dj_id=bas, status="preparing", contact_name="Lisa (ceremoniemeester)",
+        contact_phone="06 00000020", cover_image="/images/reception.jpg",
+        created_at=t0 - timedelta(days=30), updated_at=t0)
+    session.add(event)
+    await session.flush()
+    ev = event.id
 
     convo = [
         ("dj", "Hoi Jeroen en Mark! Ik ben Bas, jullie DJ op 14 juni. Wat leuk dat ik jullie avond mag verzorgen.", False),
@@ -102,11 +96,11 @@ async def seed_demo():
     ]
     for i, (role, text, pinned) in enumerate(convo):
         last = i == len(convo) - 1
-        await db.messages.insert_one({
-            "event_id": ev, "sender_id": jm if role == "customer" else bas,
-            "sender_name": "Jeroen" if role == "customer" else "Bas", "sender_role": role, "text": text,
-            "attachment": None, "pinned": pinned, "read_by_customer": True, "read_by_staff": not last,
-            "created_at": t0 - timedelta(days=5 - i, hours=3)})
+        session.add(Message(
+            event_id=ev, sender_id=jm if role == "customer" else bas,
+            sender_name="Jeroen" if role == "customer" else "Bas", sender_role=role, text=text,
+            attachment=None, pinned=pinned, read_by_customer=True, read_by_staff=not last,
+            created_at=t0 - timedelta(days=5 - i, hours=3)))
 
     music = [
         ("must_play", "Dancing Queen", "ABBA", None), ("must_play", "Mr. Brightside", "The Killers", None),
@@ -116,9 +110,9 @@ async def seed_demo():
         ("special", "Perfect", "Ed Sheeran", "opening_dance"),
         ("special", "Signed, Sealed, Delivered", "Stevie Wonder", "entrance"),
     ]
-    await db.music_items.insert_many([{
-        "event_id": ev, "category": c, "title": t, "artist": a, "moment": m, "notes": None, "source": "manual",
-        "external_ref": {}, "added_by_role": "customer", "created_at": t0} for c, t, a, m in music])
+    session.add_all([MusicItem(
+        event_id=ev, category=c, title=t, artist=a, moment=m, notes=None, source="manual",
+        external_ref={}, added_by_role="customer", created_at=t0) for c, t, a, m in music])
 
     timeline = [
         ("19:30", "Ontvangst gasten", "Welkomstdrankje met lounge muziek", "glass", "confirmed"),
@@ -129,25 +123,26 @@ async def seed_demo():
         ("00:00", "Speciaal moment", "Taart aansnijden", "cake", "suggested"),
         ("01:00", "Einde", "Laatste nummer en uitzwaaien", "moon", "suggested"),
     ]
-    await db.timeline_items.insert_many([{
-        "event_id": ev, "time": tm, "title": ti, "description": d, "icon": ic, "status": st,
-        "created_by_role": "dj" if st == "confirmed" else "customer", "created_at": t0}
+    session.add_all([TimelineItem(
+        event_id=ev, time=tm, title=ti, description=d, icon=ic, status=st,
+        created_by_role="dj" if st == "confirmed" else "customer", created_at=t0)
         for tm, ti, d, ic, st in timeline])
 
-    await db.events.insert_many([
-        {"title": "Sanne wordt 40", "event_type": "birthday", "date": "2026-11-21", "start_time": "21:00",
-         "end_time": "02:00", "venue_name": "Feestzaal Het Anker", "venue_city": "Amersfoort", "guest_count": 90,
-         "customer_id": sanne, "dj_id": thomas, "status": "new", "cover_image": "/images/party.jpg",
-         "created_at": t0 - timedelta(days=4), "updated_at": t0 - timedelta(days=2)},
-        {"title": "Kerstborrel Van Dijk Techniek", "event_type": "corporate", "date": "2026-12-18",
-         "start_time": "17:00", "end_time": None, "venue_name": None, "venue_city": "Utrecht", "guest_count": None,
-         "customer_id": vandijk, "dj_id": None, "status": "new", "cover_image": "/images/stage.jpg",
-         "created_at": t0 - timedelta(days=1), "updated_at": t0 - timedelta(days=1)},
+    session.add_all([
+        Event(title="Sanne wordt 40", event_type="birthday", date=date(2026, 11, 21), start_time="21:00",
+              end_time="02:00", venue_name="Feestzaal Het Anker", venue_city="Amersfoort", guest_count=90,
+              customer_id=sanne, dj_id=thomas, status="new", cover_image="/images/party.jpg",
+              created_at=t0 - timedelta(days=4), updated_at=t0 - timedelta(days=2)),
+        Event(title="Kerstborrel Van Dijk Techniek", event_type="corporate", date=date(2026, 12, 18),
+              start_time="17:00", end_time=None, venue_name=None, venue_city="Utrecht", guest_count=None,
+              customer_id=vandijk, dj_id=None, status="new", cover_image="/images/stage.jpg",
+              created_at=t0 - timedelta(days=1), updated_at=t0 - timedelta(days=1)),
     ])
     log.info("Demo data seeded")
 
 
 async def run_seed():
-    await create_indexes()
-    await ensure_user(os.environ["ADMIN_EMAIL"], os.environ["ADMIN_PASSWORD"], "White Vision", "admin")
-    await seed_demo()
+    async with SessionLocal() as session:
+        await ensure_user(session, os.environ["ADMIN_EMAIL"], os.environ["ADMIN_PASSWORD"], "White Vision", "admin")
+        await seed_demo(session)
+        await session.commit()

@@ -1,23 +1,8 @@
 """RSVP & invitation PDF export regression tests."""
-import os
-import uuid
 import pytest
 import requests
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
-API = f"{BASE_URL}/api"
-
-ADMIN = ("bojan.vanderheide@gmail.com", "WhiteVision!2026")
-DJ_BAS = ("bas@white-vision.nl", "Demo!2027")
-CUST_JEROEN = ("jeroen@example.nl", "Demo!2027")
-CUST_SANNE = ("sanne@example.nl", "Demo!2027")
-
-
-def login(email, password):
-    s = requests.Session()
-    r = s.post(f"{API}/auth/login", json={"email": email, "password": password}, timeout=15)
-    assert r.status_code == 200, f"login {email} failed: {r.status_code} {r.text}"
-    return s, r.json()
+from tests.helpers import API, ADMIN, DJ_BAS, CUST_JEROEN, CUST_SANNE, login
 
 
 @pytest.fixture(scope="module")

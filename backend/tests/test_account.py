@@ -3,30 +3,25 @@
 Uses sanne@example.nl for password changes (restored at end). Also sanity-checks jeroen
 profile update then restores. Cleans up login_attempts to avoid lockout.
 """
-import os
 import pytest
 import requests
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
-API = f"{BASE_URL}/api"
+from tests.helpers import API, DEMO_PASSWORD, clear_login_attempts, login
 
 
 def _login(email, password):
-    s = requests.Session()
-    r = s.post(f"{API}/auth/login", json={"email": email, "password": password})
-    assert r.status_code == 200, f"login failed {r.status_code} {r.text}"
-    return s
+    return login(email, password)[0]
 
 
 @pytest.fixture(scope="module")
 def jeroen():
-    s = _login("jeroen@example.nl", "Demo!2027")
+    s = _login("jeroen@example.nl", DEMO_PASSWORD)
     yield s
 
 
 @pytest.fixture(scope="module")
 def sanne():
-    s = _login("sanne@example.nl", "Demo!2027")
+    s = _login("sanne@example.nl", DEMO_PASSWORD)
     yield s
 
 
@@ -94,21 +89,21 @@ def test_password_wrong_current(sanne):
 
 def test_password_too_short(sanne):
     r = sanne.post(f"{API}/auth/password",
-                   json={"current_password": "Demo!2027", "new_password": "short"})
+                   json={"current_password": DEMO_PASSWORD, "new_password": "short"})
     assert r.status_code == 400
 
 
 def test_password_change_and_login_flow():
     """Change sanne's password, log in with new, old fails, then restore."""
-    s = _login("sanne@example.nl", "Demo!2027")
+    s = _login("sanne@example.nl", DEMO_PASSWORD)
     new_pw = "NewPass!2028"
     try:
         r = s.post(f"{API}/auth/password",
-                   json={"current_password": "Demo!2027", "new_password": new_pw})
+                   json={"current_password": DEMO_PASSWORD, "new_password": new_pw})
         assert r.status_code == 200
         # Old password login should fail
         r_old = requests.post(f"{API}/auth/login",
-                              json={"email": "sanne@example.nl", "password": "Demo!2027"})
+                              json={"email": "sanne@example.nl", "password": DEMO_PASSWORD})
         assert r_old.status_code == 401
         # New password login succeeds
         r_new = requests.post(f"{API}/auth/login",
@@ -118,19 +113,11 @@ def test_password_change_and_login_flow():
         # restore via the authenticated session (new pw now valid)
         s2 = _login("sanne@example.nl", new_pw)
         rr = s2.post(f"{API}/auth/password",
-                     json={"current_password": new_pw, "new_password": "Demo!2027"})
+                     json={"current_password": new_pw, "new_password": DEMO_PASSWORD})
         assert rr.status_code == 200
         # Clear any login_attempts for sanne to avoid lockouts
-        try:
-            import pymongo
-            mongo_url = os.environ.get("MONGO_URL")
-            db_name = os.environ.get("DB_NAME")
-            if mongo_url and db_name:
-                client = pymongo.MongoClient(mongo_url)
-                client[db_name].login_attempts.delete_many({"identifier": {"$regex": "sanne@example.nl"}})
-                client[db_name].login_attempts.delete_many({"identifier": {"$regex": "jeroen@example.nl"}})
-        except Exception:
-            pass
+        clear_login_attempts("sanne@example.nl")
+        clear_login_attempts("jeroen@example.nl")
 
 
 # --- Regression: dashboard & chat still return 200 ---

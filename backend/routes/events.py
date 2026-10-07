@@ -1,8 +1,11 @@
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from core import db, event_scope, fs, get_current_user, get_event_for, is_staff, now, require_admin
-from models import CUSTOMER_EDITABLE, EVENT_STATUSES, Event, EventCreate, EventFields
+from core import event_scope, get_current_user, get_event_for, is_staff, now, require_admin
+from database import get_session
+from models import Event
+from schemas import CUSTOMER_EDITABLE, EVENT_STATUSES, EventCreate, EventFields, EventOut
 from services import enrich_event
 
 router = APIRouter(tags=["events"])
@@ -14,29 +17,36 @@ def _validate(fields: dict):
 
 
 @router.get("/events")
-async def list_events(user: dict = Depends(get_current_user)):
-    docs = await db.events.find(event_scope(user)).to_list(1000)
-    docs.sort(key=lambda e: e.get("date") or "9999")
-    return [await enrich_event(d, user) for d in docs]
+async def list_events(user: dict = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
+    scope = event_scope(user)
+    stmt = select(Event).order_by(Event.date.asc().nulls_last())
+    if scope is not None:
+        stmt = stmt.where(scope)
+    docs = (await session.scalars(stmt)).all()
+    return [await enrich_event(session, d, user) for d in docs]
 
 
 @router.post("/events")
-async def create_event(body: EventCreate, user: dict = Depends(require_admin)):
+async def create_event(body: EventCreate, user: dict = Depends(require_admin),
+                       session: AsyncSession = Depends(get_session)):
     fields = body.model_dump(exclude_none=True)
     _validate(fields)
     event = Event(**fields, created_at=now(), updated_at=now())
-    res = await db.events.insert_one(event.to_mongo())
-    return await enrich_event(await db.events.find_one({"_id": res.inserted_id}), user)
+    session.add(event)
+    await session.commit()
+    await session.refresh(event)
+    return await enrich_event(session, event, user)
 
 
 @router.get("/events/{event_id}")
-async def get_event(event_id: str, user: dict = Depends(get_current_user)):
-    return await enrich_event(await get_event_for(user, event_id), user)
+async def get_event(event_id: str, user: dict = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
+    return await enrich_event(session, await get_event_for(session, user, event_id), user)
 
 
 @router.patch("/events/{event_id}")
-async def update_event(event_id: str, body: EventFields, user: dict = Depends(get_current_user)):
-    ev = await get_event_for(user, event_id)
+async def update_event(event_id: str, body: EventFields, user: dict = Depends(get_current_user),
+                       session: AsyncSession = Depends(get_session)):
+    ev = await get_event_for(session, user, event_id)
     fields = body.model_dump(exclude_unset=True)
     if not is_staff(user):
         blocked = set(fields) - CUSTOMER_EDITABLE
@@ -46,17 +56,17 @@ async def update_event(event_id: str, body: EventFields, user: dict = Depends(ge
         fields.pop("dj_id", None)
         fields.pop("customer_id", None)
     _validate(fields)
-    fields["updated_at"] = now()
-    await db.events.update_one({"_id": ev["_id"]}, {"$set": fields})
-    return await enrich_event(await db.events.find_one({"_id": ev["_id"]}), user)
+    for key, value in fields.items():
+        setattr(ev, key, value)
+    ev.updated_at = now()
+    await session.commit()
+    await session.refresh(ev)
+    return await enrich_event(session, ev, user)
 
 
 @router.delete("/events/{event_id}")
-async def delete_event(event_id: str, user: dict = Depends(require_admin)):
-    ev = await get_event_for(user, event_id)
-    async for f in db.files.find({"event_id": event_id}):
-        await fs.delete(ObjectId(f["gridfs_id"]))
-    for col in ("files", "messages", "music_items", "timeline_items", "invitations", "rsvps"):
-        await db[col].delete_many({"event_id": event_id})
-    await db.events.delete_one({"_id": ev["_id"]})
+async def delete_event(event_id: str, user: dict = Depends(require_admin), session: AsyncSession = Depends(get_session)):
+    ev = await get_event_for(session, user, event_id)
+    await session.delete(ev)
+    await session.commit()
     return {"ok": True}

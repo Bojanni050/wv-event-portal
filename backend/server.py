@@ -10,7 +10,7 @@ import os  # noqa: E402
 from fastapi import APIRouter, FastAPI  # noqa: E402
 from starlette.middleware.cors import CORSMiddleware  # noqa: E402
 
-from core import client  # noqa: E402
+from database import engine  # noqa: E402
 from routes import account, admin, auth, events, files, integrations, invitations, messages, music, rsvp, timeline  # noqa: E402
 from seed import run_seed  # noqa: E402
 
@@ -44,4 +44,4 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    await engine.dispose()

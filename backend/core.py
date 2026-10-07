@@ -1,18 +1,21 @@
+"""Shared foundation: auth (JWT cookie sessions), role checks and event scoping.
+
+PostgreSQL / SQLAlchemy port of the old Motor ``core``. ``get_current_user``
+returns a plain dict whose ``id`` / ``customer_id`` / ``dj_id`` are ``UUID``
+objects (FastAPI serializes them to strings when they reach JSON).
+"""
 import os
-from datetime import datetime, timezone, timedelta
-from typing import Annotated, Optional
+import uuid
+from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
-from bson import ObjectId
-from bson.errors import InvalidId
 from fastapi import Depends, HTTPException, Request, Response
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorGridFSBucket
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+from sqlalchemy import and_, false, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-client = AsyncIOMotorClient(os.environ["MONGO_URL"], tz_aware=True)
-db = client[os.environ["DB_NAME"]]
-fs = AsyncIOMotorGridFSBucket(db, bucket_name="event_files")
+from database import get_session
+from models import Event, Message, User
 
 JWT_ALGORITHM = "HS256"
 ACCESS_TTL = timedelta(minutes=15)
@@ -27,32 +30,12 @@ def now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def oid(value) -> ObjectId:
+def to_uuid(value) -> uuid.UUID:
+    """Parse an id from the URL, mirroring the old ``oid()`` 404 behaviour."""
     try:
-        return ObjectId(value)
-    except (InvalidId, TypeError):
+        return uuid.UUID(str(value))
+    except (ValueError, TypeError, AttributeError):
         raise HTTPException(404, "Niet gevonden")
-
-
-PyObjectId = Annotated[str, BeforeValidator(lambda v: str(v) if isinstance(v, ObjectId) else v)]
-
-
-class BaseDocument(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
-    id: Optional[PyObjectId] = Field(default=None, alias="_id")
-
-    @classmethod
-    def from_mongo(cls, doc: dict):
-        return cls.model_validate(doc)
-
-    def to_mongo(self) -> dict:
-        data = self.model_dump(exclude={"id"})
-        if self.id:
-            data["_id"] = ObjectId(self.id)
-        return data
-
-    def out(self) -> dict:
-        return self.model_dump()
 
 
 def hash_password(password: str) -> str:
@@ -105,7 +88,20 @@ def clear_auth_cookies(response: Response):
     response.delete_cookie("refresh_token", path="/", secure=True, samesite="none")
 
 
-async def get_current_user(request: Request) -> dict:
+def user_dict(user: User) -> dict:
+    """Serialize a User row to the dict shape routes have always used."""
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "role": user.role,
+        "customer_id": user.customer_id,
+        "dj_id": user.dj_id,
+        "created_at": user.created_at,
+    }
+
+
+async def get_current_user(request: Request, session: AsyncSession = Depends(get_session)) -> dict:
     token = request.cookies.get("access_token")
     if not token:
         header = request.headers.get("Authorization", "")
@@ -114,11 +110,10 @@ async def get_current_user(request: Request) -> dict:
     if not token:
         raise HTTPException(401, "Niet ingelogd")
     payload = decode_token(token, "access")
-    user = await db.users.find_one({"_id": oid(payload["sub"])})
+    user = await session.get(User, to_uuid(payload["sub"]))
     if not user:
         raise HTTPException(401, "Gebruiker niet gevonden")
-    from models import User
-    return User.from_mongo(user).out()
+    return user_dict(user)
 
 
 def is_staff(user: dict) -> bool:
@@ -137,34 +132,42 @@ async def require_admin(user: dict = Depends(get_current_user)) -> dict:
     return user
 
 
-def event_scope(user: dict) -> dict:
+def event_scope(user: dict):
+    """SQLAlchemy condition limiting events to what ``user`` may see (None = all)."""
     if user["role"] == "admin":
-        return {}
+        return None
     if user["role"] == "dj":
-        return {"dj_id": user.get("dj_id") or "__none__"}
-    return {"customer_id": user.get("customer_id") or "__none__"}
+        return Event.dj_id == user["dj_id"] if user.get("dj_id") else false()
+    return Event.customer_id == user["customer_id"] if user.get("customer_id") else false()
 
 
-async def get_event_for(user: dict, event_id: str) -> dict:
-    ev = await db.events.find_one({"_id": oid(event_id), **event_scope(user)})
+async def get_event_for(session: AsyncSession, user: dict, event_id) -> Event:
+    stmt = select(Event).where(Event.id == to_uuid(event_id))
+    scope = event_scope(user)
+    if scope is not None:
+        stmt = stmt.where(scope)
+    ev = await session.scalar(stmt)
     if not ev:
         raise HTTPException(404, "Event niet gevonden")
-    return dict(ev)
+    return ev
 
 
-async def get_child_for(user: dict, collection: str, item_id: str) -> dict:
-    doc = await db[collection].find_one({"_id": oid(item_id)})
+async def get_child_for(session: AsyncSession, model, user: dict, item_id):
+    """Load a child row and enforce that the user may access its event."""
+    doc = await session.get(model, to_uuid(item_id))
     if not doc:
         raise HTTPException(404, "Niet gevonden")
-    await get_event_for(user, doc["event_id"])
-    return dict(doc)
+    await get_event_for(session, user, doc.event_id)
+    return doc
 
 
-def unread_filter(user: dict) -> dict:
+def unread_filter(user: dict):
     if is_staff(user):
-        return {"sender_role": "customer", "read_by_staff": False}
-    return {"sender_role": {"$in": list(STAFF_ROLES)}, "read_by_customer": False}
+        return and_(Message.sender_role == "customer", Message.read_by_staff.is_(False))
+    return and_(Message.sender_role.in_(list(STAFF_ROLES)), Message.read_by_customer.is_(False))
 
 
-async def touch_event(event_id: str):
-    await db.events.update_one({"_id": oid(event_id)}, {"$set": {"updated_at": now()}})
+async def touch_event(session: AsyncSession, event_id):
+    ev = await session.get(Event, to_uuid(event_id))
+    if ev:
+        ev.updated_at = now()

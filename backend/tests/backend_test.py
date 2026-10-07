@@ -5,29 +5,12 @@ music, timeline, files, invitations (incl public share), admin (customers/djs/
 templates), WordPress integration. Uses only API; cleans up TEST_* resources.
 """
 import io
-import os
 import uuid
-import time
+
 import pytest
 import requests
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://my-event-1.preview.emergentagent.com").rstrip("/")
-API = f"{BASE_URL}/api"
-
-ADMIN = ("bojan.vanderheide@gmail.com", "WhiteVision!2026")
-DJ_BAS = ("bas@white-vision.nl", "Demo!2027")
-DJ_THOMAS = ("thomas@white-vision.nl", "Demo!2027")
-CUST_JEROEN = ("jeroen@example.nl", "Demo!2027")
-CUST_SANNE = ("sanne@example.nl", "Demo!2027")
-
-WP_API_KEY = "wWMOJEud8qmODhJgNvbNdx8r77c_xWd3"
-
-
-def login(email, password):
-    s = requests.Session()
-    r = s.post(f"{API}/auth/login", json={"email": email, "password": password}, timeout=15)
-    assert r.status_code == 200, f"login {email} failed: {r.status_code} {r.text}"
-    return s, r.json()
+from tests.helpers import API, ADMIN, DJ_BAS, DJ_THOMAS, CUST_JEROEN, CUST_SANNE, WP_API_KEY, login
 
 
 # ------------------- Fixtures -------------------
