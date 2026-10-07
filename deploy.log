@@ -1,0 +1,421 @@
+ Image wv-portal-backend Building 
+ Image wv-portal-frontend Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.04kB done
+#1 DONE 0.0s
+
+#2 [frontend internal] load build definition from Dockerfile
+#2 transferring dockerfile: 818B done
+#2 DONE 0.0s
+
+#3 [backend internal] load build definition from Dockerfile
+#3 transferring dockerfile: 399B done
+#3 DONE 0.0s
+
+#4 [backend internal] load metadata for docker.io/library/python:3.11-slim
+#4 ...
+
+#5 [frontend internal] load metadata for docker.io/library/node:20-alpine
+#5 DONE 0.7s
+
+#6 [frontend internal] load metadata for docker.io/library/nginx:alpine
+#6 DONE 1.3s
+
+#4 [backend internal] load metadata for docker.io/library/python:3.11-slim
+#4 DONE 1.3s
+
+#7 [frontend internal] load .dockerignore
+#7 transferring context: 66B done
+#7 DONE 0.0s
+
+#8 [backend internal] load .dockerignore
+#8 transferring context: 101B done
+#8 DONE 0.0s
+
+#9 [frontend build 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#9 DONE 0.0s
+
+#10 [frontend build 2/6] WORKDIR /app
+#10 CACHED
+
+#11 [backend internal] load build context
+#11 transferring context: 123.86kB done
+#11 DONE 0.0s
+
+#12 [frontend internal] load build context
+#12 transferring context: 2.97MB 0.0s done
+#12 DONE 0.0s
+
+#13 [frontend build 3/6] COPY package.json yarn.lock* ./
+#13 DONE 0.0s
+
+#14 [frontend stage-1 1/3] FROM docker.io/library/nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
+#14 resolve docker.io/library/nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2 done
+#14 sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2 10.33kB / 10.33kB done
+#14 sha256:3dd08163706a20b20622f310ec10258cc96e9007ab357f7201955bc880ac17f4 12.32kB / 12.32kB done
+#14 sha256:d9aae54b58315e84b9c3ac5f00bad6610e0e28ad9ff28fcde694647e0be13131 0B / 1.93MB 0.2s
+#14 sha256:6c53d0b2a666ed8f8fad8d9982e30cf24eb085036c17b27591665ca25e1ba40c 629B / 629B 0.2s done
+#14 sha256:0530961ff0592b58c10f767535cc0abdfccf9e389ff7cc90f87320c1bc7e8506 2.50kB / 2.50kB done
+#14 sha256:745dfb2690dd8627e1593941caccc756f14943df7930a478beb4e808c5695cb9 0B / 965B 0.2s
+#14 sha256:9a9a644fdd6a3681d43dace44c8cfef374cfd7b24f433113379ea483692498a8 0B / 404B 0.2s
+#14 sha256:745dfb2690dd8627e1593941caccc756f14943df7930a478beb4e808c5695cb9 965B / 965B 0.3s done
+#14 sha256:64c8194480fee2c03e01cc561cf5542733627d2c7de493a028139677025f975c 0B / 1.21kB 0.4s
+#14 sha256:d9aae54b58315e84b9c3ac5f00bad6610e0e28ad9ff28fcde694647e0be13131 1.93MB / 1.93MB 0.4s done
+#14 sha256:9a9a644fdd6a3681d43dace44c8cfef374cfd7b24f433113379ea483692498a8 404B / 404B 0.4s done
+#14 sha256:64c8194480fee2c03e01cc561cf5542733627d2c7de493a028139677025f975c 1.21kB / 1.21kB 0.5s done
+#14 extracting sha256:d9aae54b58315e84b9c3ac5f00bad6610e0e28ad9ff28fcde694647e0be13131 0.0s done
+#14 sha256:e72112c14215406dc7f23ef8e5cfdfddeb8662176167382ad64ec86f52b7a88e 0B / 20.53MB 0.5s
+#14 sha256:e76228b47809e8a4bd37a6ba52a04d282d8c72ddf0ff9e8b83fd6318631abd52 0B / 1.40kB 0.5s
+#14 sha256:e72112c14215406dc7f23ef8e5cfdfddeb8662176167382ad64ec86f52b7a88e 1.05MB / 20.53MB 0.6s
+#14 sha256:e76228b47809e8a4bd37a6ba52a04d282d8c72ddf0ff9e8b83fd6318631abd52 1.40kB / 1.40kB 0.6s done
+#14 sha256:e72112c14215406dc7f23ef8e5cfdfddeb8662176167382ad64ec86f52b7a88e 20.53MB / 20.53MB 0.6s done
+#14 extracting sha256:6c53d0b2a666ed8f8fad8d9982e30cf24eb085036c17b27591665ca25e1ba40c done
+#14 extracting sha256:745dfb2690dd8627e1593941caccc756f14943df7930a478beb4e808c5695cb9
+#14 extracting sha256:745dfb2690dd8627e1593941caccc756f14943df7930a478beb4e808c5695cb9 done
+#14 extracting sha256:9a9a644fdd6a3681d43dace44c8cfef374cfd7b24f433113379ea483692498a8 done
+#14 extracting sha256:64c8194480fee2c03e01cc561cf5542733627d2c7de493a028139677025f975c done
+#14 extracting sha256:e76228b47809e8a4bd37a6ba52a04d282d8c72ddf0ff9e8b83fd6318631abd52 done
+#14 extracting sha256:e72112c14215406dc7f23ef8e5cfdfddeb8662176167382ad64ec86f52b7a88e
+#14 extracting sha256:e72112c14215406dc7f23ef8e5cfdfddeb8662176167382ad64ec86f52b7a88e 0.4s done
+#14 DONE 1.4s
+
+#15 [backend 1/6] FROM docker.io/library/python:3.11-slim@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce
+#15 resolve docker.io/library/python:3.11-slim@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce done
+#15 sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce 10.37kB / 10.37kB done
+#15 sha256:e529028263dbe6910a2d96f7d2b8f5266385e917fd45d286ef166977c094a51e 1.75kB / 1.75kB done
+#15 sha256:541096ae9b05d3b850341b78790e2ed31e94d5aa0ea086933c6ff0c09ffa2e63 5.49kB / 5.49kB done
+#15 sha256:0f752a1982d6f819fc2c9e78ac1514c63f2f2e1dec7885ffd4cb6809ba4a26ca 1.29MB / 1.29MB 0.6s done
+#15 sha256:759a7f30c31818dda4c97b407b24d93da479c306568d185ced927e1a749164f1 14.46MB / 14.46MB 0.8s done
+#15 extracting sha256:0f752a1982d6f819fc2c9e78ac1514c63f2f2e1dec7885ffd4cb6809ba4a26ca 0.2s done
+#15 sha256:496c1a902b3a93cea3e54b90b79dbcaa0e58ad90c3fe9dd0a43c9557dc47f17d 250B / 250B 0.9s done
+#15 extracting sha256:759a7f30c31818dda4c97b407b24d93da479c306568d185ced927e1a749164f1 0.6s
+#15 extracting sha256:759a7f30c31818dda4c97b407b24d93da479c306568d185ced927e1a749164f1 1.1s done
+#15 extracting sha256:496c1a902b3a93cea3e54b90b79dbcaa0e58ad90c3fe9dd0a43c9557dc47f17d
+#15 extracting sha256:496c1a902b3a93cea3e54b90b79dbcaa0e58ad90c3fe9dd0a43c9557dc47f17d done
+#15 DONE 2.0s
+
+#16 [backend 2/6] WORKDIR /app
+#16 DONE 0.2s
+
+#17 [frontend build 4/6] RUN node -e "const f='package.json',p=require('./'+f);for(const k of Object.keys(p.devDependencies||{}))if(k.startsWith('@emergentbase/'))delete p.devDependencies[k];require('fs').writeFileSync(f,JSON.stringify(p,null,2))"  && yarn install --network-timeout 600000
+#17 0.679 yarn install v1.22.22
+#17 0.720 info No lockfile found.
+#17 0.731 [1/4] Resolving packages...
+#17 ...
+
+#18 [backend 3/6] COPY requirements.txt .
+#18 DONE 0.0s
+
+#17 [frontend build 4/6] RUN node -e "const f='package.json',p=require('./'+f);for(const k of Object.keys(p.devDependencies||{}))if(k.startsWith('@emergentbase/'))delete p.devDependencies[k];require('fs').writeFileSync(f,JSON.stringify(p,null,2))"  && yarn install --network-timeout 600000
+#17 2.442 warning Resolution field "underscore@1.13.8" is incompatible with requested version "underscore@1.13.6"
+#17 2.915 warning Resolution field "uuid@11.1.1" is incompatible with requested version "uuid@^8.3.2"
+#17 2.952 warning Resolution field "shell-quote@1.9.0" is incompatible with requested version "shell-quote@^1.10.0"
+#17 5.334 warning svgo > stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
+#17 ...
+
+#19 [backend 4/6] RUN sed '/^# Tests/,$d' requirements.txt > req.prod.txt  && pip install --no-cache-dir -r req.prod.txt
+#19 1.444 Collecting fastapi==0.110.1 (from -r req.prod.txt (line 2))
+#19 1.469   Downloading fastapi-0.110.1-py3-none-any.whl.metadata (24 kB)
+#19 1.495 Collecting uvicorn==0.25.0 (from -r req.prod.txt (line 3))
+#19 1.498   Downloading uvicorn-0.25.0-py3-none-any.whl.metadata (6.4 kB)
+#19 1.511 Collecting python-dotenv>=1.0.1 (from -r req.prod.txt (line 4))
+#19 1.513   Downloading python_dotenv-1.2.4-py3-none-any.whl.metadata (29 kB)
+#19 1.526 Collecting python-multipart>=0.0.9 (from -r req.prod.txt (line 5))
+#19 1.529   Downloading python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+#19 1.809 Collecting sqlalchemy>=2.0 (from sqlalchemy[asyncio]>=2.0->-r req.prod.txt (line 8))
+#19 1.811   Downloading sqlalchemy-2.1.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.7 kB)
+#19 1.848 Collecting asyncpg>=0.29 (from -r req.prod.txt (line 9))
+#19 1.851   Downloading asyncpg-0.32.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.4 kB)
+#19 1.874 Collecting alembic>=1.13 (from -r req.prod.txt (line 10))
+#19 1.877   Downloading alembic-1.20.0-py3-none-any.whl.metadata (7.3 kB)
+#19 1.987 Collecting greenlet>=3.0 (from -r req.prod.txt (line 11))
+#19 1.990   Downloading greenlet-3.5.6-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+#19 2.080 Collecting pydantic>=2.6.4 (from -r req.prod.txt (line 14))
+#19 2.082   Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+#19 2.085      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 110.2/110.2 kB 263.6 MB/s eta 0:00:00
+#19 2.153 Collecting pyjwt>=2.10.1 (from -r req.prod.txt (line 15))
+#19 2.155   Downloading pyjwt-2.15.1-py3-none-any.whl.metadata (3.5 kB)
+#19 2.185 Collecting bcrypt==4.1.3 (from -r req.prod.txt (line 16))
+#19 2.188   Downloading bcrypt-4.1.3-cp39-abi3-manylinux_2_28_x86_64.whl.metadata (9.5 kB)
+#19 2.206 Collecting httpx>=0.27 (from -r req.prod.txt (line 17))
+#19 2.208   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+#19 2.263 Collecting starlette<0.38.0,>=0.37.2 (from fastapi==0.110.1->-r req.prod.txt (line 2))
+#19 2.266   Downloading starlette-0.37.2-py3-none-any.whl.metadata (5.9 kB)
+#19 2.280 Collecting typing-extensions>=4.8.0 (from fastapi==0.110.1->-r req.prod.txt (line 2))
+#19 2.282   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+#19 2.302 Collecting click>=7.0 (from uvicorn==0.25.0->-r req.prod.txt (line 3))
+#19 2.304   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+#19 2.312 Collecting h11>=0.8 (from uvicorn==0.25.0->-r req.prod.txt (line 3))
+#19 2.314   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+#19 2.348 Collecting Mako (from alembic>=1.13->-r req.prod.txt (line 10))
+#19 2.350   Downloading mako-1.4.3-py3-none-any.whl.metadata (2.9 kB)
+#19 2.366 Collecting annotated-types>=0.6.0 (from pydantic>=2.6.4->-r req.prod.txt (line 14))
+#19 2.368   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+#19 2.919 Collecting pydantic-core==2.46.5 (from pydantic>=2.6.4->-r req.prod.txt (line 14))
+#19 2.921   Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+#19 2.932 Collecting typing-inspection>=0.4.2 (from pydantic>=2.6.4->-r req.prod.txt (line 14))
+#19 2.934   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+#19 3.077 Collecting anyio (from httpx>=0.27->-r req.prod.txt (line 17))
+#19 3.079   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+#19 3.094 Collecting certifi (from httpx>=0.27->-r req.prod.txt (line 17))
+#19 3.097   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+#19 3.112 Collecting httpcore==1.* (from httpx>=0.27->-r req.prod.txt (line 17))
+#19 3.114   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+#19 3.127 Collecting idna (from httpx>=0.27->-r req.prod.txt (line 17))
+#19 3.130   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+#19 3.230 Collecting MarkupSafe>=2.0 (from Mako->alembic>=1.13->-r req.prod.txt (line 10))
+#19 3.233   Downloading markupsafe-3.0.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+#19 3.242 Downloading fastapi-0.110.1-py3-none-any.whl (91 kB)
+#19 3.245    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 91.9/91.9 kB 208.7 MB/s eta 0:00:00
+#19 3.248 Downloading uvicorn-0.25.0-py3-none-any.whl (60 kB)
+#19 3.250    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 60.3/60.3 kB 278.1 MB/s eta 0:00:00
+#19 3.254 Downloading bcrypt-4.1.3-cp39-abi3-manylinux_2_28_x86_64.whl (283 kB)
+#19 3.256    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 283.7/283.7 kB 430.8 MB/s eta 0:00:00
+#19 3.258 Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+#19 3.260 Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
+#19 3.270 Downloading sqlalchemy-2.1.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.6 MB)
+#19 3.319    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.6/4.6 MB 98.4 MB/s eta 0:00:00
+#19 3.323 Downloading asyncpg-0.32.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+#19 3.332    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 434.8 MB/s eta 0:00:00
+#19 3.334 Downloading alembic-1.20.0-py3-none-any.whl (268 kB)
+#19 3.337    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 268.7/268.7 kB 321.9 MB/s eta 0:00:00
+#19 3.340 Downloading greenlet-3.5.6-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (624 kB)
+#19 3.342    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 624.4/624.4 kB 491.4 MB/s eta 0:00:00
+#19 3.347 Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+#19 3.349    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 472.6/472.6 kB 520.3 MB/s eta 0:00:00
+#19 3.351 Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+#19 3.358    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 401.9 MB/s eta 0:00:00
+#19 3.360 Downloading pyjwt-2.15.1-py3-none-any.whl (33 kB)
+#19 3.362 Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+#19 3.364    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 73.5/73.5 kB 466.0 MB/s eta 0:00:00
+#19 3.366 Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+#19 3.368    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.8/78.8 kB 439.9 MB/s eta 0:00:00
+#19 3.371 Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+#19 3.373 Downloading click-8.5.0-py3-none-any.whl (125 kB)
+#19 3.375    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.3/125.3 kB 388.5 MB/s eta 0:00:00
+#19 3.377 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+#19 3.379 Downloading starlette-0.37.2-py3-none-any.whl (71 kB)
+#19 3.380    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 71.9/71.9 kB 433.4 MB/s eta 0:00:00
+#19 3.383 Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+#19 3.385    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 132.1/132.1 kB 191.3 MB/s eta 0:00:00
+#19 3.387 Downloading idna-3.20-py3-none-any.whl (69 kB)
+#19 3.388    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 69.6/69.6 kB 442.2 MB/s eta 0:00:00
+#19 3.390 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#19 3.391    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.6/45.6 kB 383.5 MB/s eta 0:00:00
+#19 3.393 Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+#19 3.395 Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+#19 3.397    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 137.0/137.0 kB 434.1 MB/s eta 0:00:00
+#19 3.400 Downloading mako-1.4.3-py3-none-any.whl (80 kB)
+#19 3.401    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 80.2/80.2 kB 327.5 MB/s eta 0:00:00
+#19 3.403 Downloading markupsafe-3.0.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+#19 3.530 Installing collected packages: typing-extensions, python-multipart, python-dotenv, pyjwt, MarkupSafe, idna, h11, greenlet, click, certifi, bcrypt, asyncpg, annotated-types, uvicorn, typing-inspection, sqlalchemy, pydantic-core, Mako, httpcore, anyio, starlette, pydantic, httpx, alembic, fastapi
+#19 5.315 Successfully installed Mako-1.4.3 MarkupSafe-3.0.4 alembic-1.20.0 annotated-types-0.8.0 anyio-4.15.1 asyncpg-0.32.0 bcrypt-4.1.3 certifi-2026.7.22 click-8.5.0 fastapi-0.110.1 greenlet-3.5.6 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.20 pydantic-2.13.5 pydantic-core-2.46.5 pyjwt-2.15.1 python-dotenv-1.2.4 python-multipart-0.0.32 sqlalchemy-2.1.3 starlette-0.37.2 typing-extensions-4.16.0 typing-inspection-0.4.4 uvicorn-0.25.0
+#19 5.315 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#19 5.372 
+#19 5.372 [notice] A new release of pip is available: 24.0 -> 26.2.1
+#19 5.372 [notice] To update, run: pip install --upgrade pip
+#19 DONE 6.1s
+
+#17 [frontend build 4/6] RUN node -e "const f='package.json',p=require('./'+f);for(const k of Object.keys(p.devDependencies||{}))if(k.startsWith('@emergentbase/'))delete p.devDependencies[k];require('fs').writeFileSync(f,JSON.stringify(p,null,2))"  && yarn install --network-timeout 600000
+#17 ...
+
+#20 [backend 5/6] COPY . .
+#20 DONE 0.0s
+
+#21 [backend 6/6] RUN chmod +x entrypoint.sh
+#21 DONE 0.3s
+
+#17 [frontend build 4/6] RUN node -e "const f='package.json',p=require('./'+f);for(const k of Object.keys(p.devDependencies||{}))if(k.startsWith('@emergentbase/'))delete p.devDependencies[k];require('fs').writeFileSync(f,JSON.stringify(p,null,2))"  && yarn install --network-timeout 600000
+#17 ...
+
+#22 [backend] exporting to image
+#22 exporting layers
+#22 exporting layers 0.4s done
+#22 writing image sha256:a011cb302951a306d38e89006fa154ea39a034d83d73cfc828db22d2c82e8413 done
+#22 naming to docker.io/library/wv-portal-backend done
+#22 DONE 0.4s
+
+#23 [backend] resolving provenance for metadata file
+#23 DONE 0.0s
+
+#17 [frontend build 4/6] RUN node -e "const f='package.json',p=require('./'+f);for(const k of Object.keys(p.devDependencies||{}))if(k.startsWith('@emergentbase/'))delete p.devDependencies[k];require('fs').writeFileSync(f,JSON.stringify(p,null,2))"  && yarn install --network-timeout 600000
+#17 21.25 warning Resolution field "resolve-url-loader@5.0.0" is incompatible with requested version "resolve-url-loader@^4.0.0"
+#17 21.25 warning Resolution field "webpack-dev-server@5.2.6" is incompatible with requested version "webpack-dev-server@^4.6.0"
+#17 21.31 warning react-scripts > eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+#17 21.71 warning Resolution field "serialize-javascript@7.0.5" is incompatible with requested version "serialize-javascript@^6.0.0"
+#17 21.82 warning react-scripts > workbox-webpack-plugin@6.6.1: this package has been deprecated
+#17 21.97 warning react-scripts > eslint > @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+#17 22.49 warning react-scripts > source-map-loader > abab@2.0.6: Use your platform's native atob() and btoa() methods instead
+#17 22.68 warning react-scripts > react-dev-utils > fork-ts-checker-webpack-plugin > memfs@3.6.0: this will be v4
+#17 24.22 warning Resolution field "@babel/plugin-transform-modules-systemjs@7.29.4" is incompatible with requested version "@babel/plugin-transform-modules-systemjs@^7.29.7"
+#17 24.26 warning react-scripts > babel-preset-react-app > @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
+#17 24.28 warning react-scripts > babel-preset-react-app > @babel/plugin-proposal-nullish-coalescing-operator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
+#17 24.28 warning react-scripts > babel-preset-react-app > @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
+#17 24.29 warning react-scripts > babel-preset-react-app > @babel/plugin-proposal-private-methods@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
+#17 24.31 warning react-scripts > babel-preset-react-app > @babel/plugin-proposal-private-property-in-object@7.21.11: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-property-in-object instead.
+#17 24.57 warning react-scripts > workbox-webpack-plugin > workbox-build@6.6.1: this package has been deprecated
+#17 24.59 warning react-scripts > @svgr/webpack > @svgr/plugin-svgo > svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
+#17 24.59 warning react-scripts > @svgr/webpack > @svgr/plugin-svgo > svgo > stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
+#17 24.59 warning Resolution field "nth-check@2.0.1" is incompatible with requested version "nth-check@^1.0.2"
+#17 24.62 warning react-scripts > babel-preset-react-app > @babel/plugin-proposal-optional-chaining@7.21.0: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-chaining instead.
+#17 24.70 warning react-scripts > jest > @jest/core > rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+#17 24.95 warning react-scripts > eslint > file-entry-cache > flat-cache > rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+#17 25.15 warning react-scripts > eslint > @humanwhocodes/config-array > @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+#17 25.59 warning react-scripts > react-dev-utils > fork-ts-checker-webpack-plugin > glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#17 25.59 warning react-scripts > workbox-webpack-plugin > workbox-build > glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#17 25.59 warning react-scripts > jest > jest-cli > jest-config > glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#17 25.59 warning react-scripts > jest > @jest/core > rimraf > glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#17 25.59 warning react-scripts > jest > @jest/core > jest-runtime > glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#17 25.59 warning react-scripts > jest > @jest/core > @jest/reporters > glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#17 25.59 warning react-scripts > babel-jest > babel-plugin-istanbul > test-exclude > glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+#17 26.00 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-core@6.6.1: this package has been deprecated
+#17 26.15 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-sw@6.6.1: this package has been deprecated
+#17 26.20 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-window@6.6.1: this package has been deprecated
+#17 26.20 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-window > workbox-core@6.6.1: this package has been deprecated
+#17 26.26 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-recipes@6.6.1: this package has been deprecated
+#17 26.26 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-recipes > workbox-core@6.6.1: this package has been deprecated
+#17 26.29 warning react-scripts > workbox-webpack-plugin > workbox-build > rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
+#17 26.29 warning Resolution field "serialize-javascript@7.0.5" is incompatible with requested version "serialize-javascript@^4.0.0"
+#17 26.32 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-routing@6.6.1: this package has been deprecated
+#17 26.32 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-recipes > workbox-routing@6.6.1: this package has been deprecated
+#17 26.32 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-routing > workbox-core@6.6.1: this package has been deprecated
+#17 26.33 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-precaching@6.6.1: this package has been deprecated
+#17 26.33 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-recipes > workbox-precaching@6.6.1: this package has been deprecated
+#17 26.33 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-precaching > workbox-core@6.6.1: this package has been deprecated
+#17 26.33 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-precaching > workbox-routing@6.6.1: this package has been deprecated
+#17 26.33 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-streams@6.6.1: this package has been deprecated
+#17 26.33 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-streams > workbox-core@6.6.1: this package has been deprecated
+#17 26.33 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-streams > workbox-routing@6.6.1: this package has been deprecated
+#17 26.34 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-google-analytics@6.6.1: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
+#17 26.34 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-google-analytics > workbox-core@6.6.1: this package has been deprecated
+#17 26.34 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-google-analytics > workbox-routing@6.6.1: this package has been deprecated
+#17 26.34 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-background-sync@6.6.1: this package has been deprecated
+#17 26.34 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-google-analytics > workbox-background-sync@6.6.1: this package has been deprecated
+#17 26.34 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-background-sync > workbox-core@6.6.1: this package has been deprecated
+#17 26.35 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-expiration@6.6.1: this package has been deprecated
+#17 26.35 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-recipes > workbox-expiration@6.6.1: this package has been deprecated
+#17 26.35 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-expiration > workbox-core@6.6.1: this package has been deprecated
+#17 26.39 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-strategies@6.6.1: this package has been deprecated
+#17 26.39 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-recipes > workbox-strategies@6.6.1: this package has been deprecated
+#17 26.39 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-precaching > workbox-strategies@6.6.1: this package has been deprecated
+#17 26.39 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-google-analytics > workbox-strategies@6.6.1: this package has been deprecated
+#17 26.39 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-strategies > workbox-core@6.6.1: this package has been deprecated
+#17 26.49 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-range-requests@6.6.1: this package has been deprecated
+#17 26.49 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-range-requests > workbox-core@6.6.1: this package has been deprecated
+#17 26.52 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-navigation-preload@6.6.1: this package has been deprecated
+#17 26.52 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-navigation-preload > workbox-core@6.6.1: this package has been deprecated
+#17 26.52 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-broadcast-update@6.6.1: this package has been deprecated
+#17 26.52 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-broadcast-update > workbox-core@6.6.1: this package has been deprecated
+#17 26.53 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-cacheable-response@6.6.1: workbox-background-sync@6.6.1
+#17 26.53 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-recipes > workbox-cacheable-response@6.6.1: workbox-background-sync@6.6.1
+#17 26.53 warning react-scripts > workbox-webpack-plugin > workbox-build > workbox-cacheable-response > workbox-core@6.6.1: this package has been deprecated
+#17 27.87 warning react-scripts > react-dev-utils > fork-ts-checker-webpack-plugin > glob > inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#17 28.72 warning react-scripts > jest > jest-cli > jest-config > jest-environment-jsdom > jsdom > abab@2.0.6: Use your platform's native atob() and btoa() methods instead
+#17 28.82 warning react-scripts > @svgr/webpack > @svgr/plugin-svgo > svgo > coa > q@1.5.1: You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+#17 28.82 
+#17 28.82 (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+#17 29.37 warning react-scripts > workbox-webpack-plugin > workbox-build > @rollup/plugin-replace > magic-string > sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+#17 29.38 warning react-scripts > jest > jest-cli > jest-config > jest-environment-jsdom > jsdom > data-urls > abab@2.0.6: Use your platform's native atob() and btoa() methods instead
+#17 29.40 warning react-scripts > jest > jest-cli > jest-config > jest-environment-jsdom > jsdom > whatwg-encoding@1.0.5: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+#17 29.41 warning Resolution field "@tootallnate/once@2.0.1" is incompatible with requested version "@tootallnate/once@1"
+#17 29.44 warning react-scripts > jest > jest-cli > jest-config > jest-environment-jsdom > jsdom > html-encoding-sniffer > whatwg-encoding@1.0.5: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+#17 29.56 warning react-scripts > jest > jest-cli > jest-config > jest-environment-jsdom > jsdom > w3c-hr-time@1.0.2: Use your platform's native performance.now() and performance.timeOrigin.
+#17 29.57 warning react-scripts > jest > jest-cli > jest-config > jest-environment-jsdom > jsdom > domexception@2.0.1: Use your platform's native DOMException instead
+#17 31.17 warning @babel/plugin-proposal-private-property-in-object@7.21.11: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-property-in-object instead.
+#17 31.84 warning eslint@9.23.0: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+#17 31.84 warning Resolution field "@eslint/plugin-kit@0.3.4" is incompatible with requested version "@eslint/plugin-kit@^0.2.7"
+#17 32.11 [2/4] Fetching packages...
+#17 56.92 [3/4] Linking dependencies...
+#17 56.92 warning " > @babel/plugin-transform-modules-systemjs@7.29.4" has unmet peer dependency "@babel/core@^7.0.0-0".
+#17 56.92 warning "@babel/plugin-transform-modules-systemjs > @babel/helper-module-transforms@7.29.7" has unmet peer dependency "@babel/core@^7.0.0".
+#17 56.93 warning " > react-day-picker@8.10.1" has incorrect peer dependency "date-fns@^2.28.0 || ^3.0.0".
+#17 56.93 warning " > react-day-picker@8.10.1" has incorrect peer dependency "react@^16.8.0 || ^17.0.0 || ^18.0.0".
+#17 56.93 warning "react-scripts > react-dev-utils > fork-ts-checker-webpack-plugin@6.5.3" has unmet peer dependency "typescript@>= 2.7".
+#17 56.94 warning " > @babel/plugin-proposal-private-property-in-object@7.21.11" has unmet peer dependency "@babel/core@^7.0.0-0".
+#17 56.94 warning "react-scripts > eslint-config-react-app > eslint-plugin-flowtype@8.0.3" has unmet peer dependency "@babel/plugin-syntax-flow@^7.14.5".
+#17 56.94 warning "react-scripts > eslint-config-react-app > eslint-plugin-flowtype@8.0.3" has unmet peer dependency "@babel/plugin-transform-react-jsx@^7.14.9".
+#17 56.94 warning "react-scripts > eslint-config-react-app > @typescript-eslint/eslint-plugin > tsutils@3.21.0" has unmet peer dependency "typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta".
+#17 56.94 warning " > recharts@3.6.0" has unmet peer dependency "react-is@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0".
+#17 56.94 warning "@craco/craco > cosmiconfig-typescript-loader@1.0.9" has unmet peer dependency "@types/node@*".
+#17 56.94 warning "@craco/craco > cosmiconfig-typescript-loader@1.0.9" has unmet peer dependency "typescript@>=3".
+#17 56.94 warning "@craco/craco > cosmiconfig-typescript-loader > ts-node@10.9.2" has unmet peer dependency "@types/node@*".
+#17 56.94 warning "@craco/craco > cosmiconfig-typescript-loader > ts-node@10.9.2" has unmet peer dependency "typescript@>=2.7".
+#17 56.97 warning Workspaces can only be enabled in private projects.
+#17 56.97 warning Workspaces can only be enabled in private projects.
+#17 57.02 warning Workspaces can only be enabled in private projects.
+#17 68.91 [4/4] Building fresh packages...
+#17 69.93 success Saved lockfile.
+#17 69.94 Done in 69.27s.
+#17 DONE 70.6s
+
+#24 [frontend build 5/6] COPY . .
+#24 DONE 0.0s
+
+#25 [frontend build 6/6] RUN yarn build
+#25 0.334 yarn run v1.22.22
+#25 0.368 $ craco build
+#25 1.353 Creating an optimized production build...
+#25 17.11 Compiled successfully.
+#25 17.11 
+#25 17.11 File sizes after gzip:
+#25 17.11 
+#25 17.14   321.77 kB  build/static/js/main.ce230e41.js
+#25 17.14   46.3 kB    build/static/js/52.3b8ee536.chunk.js
+#25 17.14   33.51 kB   build/static/js/265.5e877a9f.chunk.js
+#25 17.14   12.64 kB   build/static/css/main.62fd67a3.css
+#25 17.14   11.32 kB   build/static/js/82.b9a1bcbb.chunk.js
+#25 17.14 
+#25 17.14 The project was built assuming it is hosted at /.
+#25 17.14 You can control this with the homepage field in your package.json.
+#25 17.14 
+#25 17.14 The build folder is ready to be deployed.
+#25 17.14 You may serve it with a static server:
+#25 17.14 
+#25 17.14   yarn global add serve
+#25 17.14   serve -s build
+#25 17.14 
+#25 17.14 Find out more about deployment here:
+#25 17.14 
+#25 17.14   https://cra.link/deployment
+#25 17.14 
+#25 17.24 Done in 16.91s.
+#25 DONE 17.3s
+
+#26 [frontend stage-1 2/3] COPY --from=build /app/build /usr/share/nginx/html
+#26 DONE 0.0s
+
+#27 [frontend stage-1 3/3] COPY nginx.conf /etc/nginx/conf.d/default.conf
+#27 DONE 0.0s
+
+#28 [frontend] exporting to image
+#28 exporting layers 0.0s done
+#28 writing image sha256:b778d76d098398a3bfbfdfab7f1e7d9a69ff407f590c0e5e6075cfde5257cba3 done
+#28 naming to docker.io/library/wv-portal-frontend done
+#28 DONE 0.0s
+
+#29 [frontend] resolving provenance for metadata file
+#29 DONE 0.0s
+ Image wv-portal-backend Built 
+ Image wv-portal-frontend Built 
+ Network wv-portal_default Creating 
+ Network wv-portal_default Creating 
+ Volume wv-portal_wv_pgdata Creating 
+ Volume wv-portal_wv_pgdata Creating 
+ Volume wv-portal_wv_pgdata Created 
+ Volume wv-portal_wv_pgdata Created 
+ Network wv-portal_default Created 
+ Network wv-portal_default Created 
+ Container wv-portal-postgres-1 Creating 
+ Container wv-portal-postgres-1 Created 
+ Container wv-portal-backend-1 Creating 
+ Container wv-portal-backend-1 Created 
+ Container wv-portal-frontend-1 Creating 
+ Container wv-portal-frontend-1 Created 
+ Container wv-portal-postgres-1 Starting 
+ Container wv-portal-postgres-1 Started 
+ Container wv-portal-postgres-1 Waiting 
+ Container wv-portal-postgres-1 Healthy 
+ Container wv-portal-backend-1 Starting 
+ Container wv-portal-backend-1 Started 
+ Container wv-portal-frontend-1 Starting 
+ Container wv-portal-frontend-1 Started 

@@ -1,8 +1,13 @@
+import asyncio
 import ipaddress
 import logging
 import os
 import re
-from html import escape
+import smtplib
+import ssl
+from email.message import EmailMessage
+from email.utils import formataddr, formatdate, make_msgid
+from html import escape, unescape
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 
@@ -86,8 +91,50 @@ def _assert_safe_email(subject: str, html: str) -> None:
                 raise ValueError(f"Anchor text {m.group(1)!r} ≠ real link host {real!r} (G3)")
 
 
+def _send_smtp(to: str, subject: str, html: str) -> str:
+    """Send via SMTP (SMTP_HOST/PORT/USER/PASSWORD/FROM). Port 465 = implicit TLS, else STARTTLS."""
+    host = os.environ["SMTP_HOST"]
+    port = int(os.environ.get("SMTP_PORT", "587"))
+    user = os.environ.get("SMTP_USER", "")
+    password = os.environ.get("SMTP_PASSWORD", "")
+    sender = os.environ.get("SMTP_FROM") or user
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = formataddr((os.environ["EMAIL_FROM_NAME"], sender))
+    msg["To"] = to
+    msg["Date"] = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid(domain=sender.split("@")[-1])
+    msg.set_content(_html_to_text(html))
+    msg.add_alternative(html, subtype="html")
+
+    ctx = ssl.create_default_context()
+    if port == 465:
+        server = smtplib.SMTP_SSL(host, port, context=ctx, timeout=30)
+    else:
+        server = smtplib.SMTP(host, port, timeout=30)
+        server.starttls(context=ctx)
+    with server:
+        if user:
+            server.login(user, password)
+        server.send_message(msg)
+    return msg["Message-ID"]
+
+
+def _html_to_text(html: str) -> str:
+    text = re.sub(r"(?is)<(script|style).*?</\1>", "", html)
+    text = re.sub(r"(?i)<br\s*/?>|</p>|</h[1-6]>|</tr>", "\n", text)
+    text = re.sub(r'(?is)<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', r"\2 (\1)", text)
+    text = re.sub(r"<[^>]+>", "", text)
+    text = unescape(text)
+    return re.sub(r"\n\s*\n+", "\n\n", re.sub(r"[ \t]+", " ", text)).strip()
+
+
 async def send_email(*, to: str, subject: str, html: str) -> str:
     _assert_safe_email(subject, html)
+    if os.environ.get("SMTP_HOST"):
+        return await asyncio.to_thread(_send_smtp, to, subject, html)
+    # Fallback: Emergent managed email proxy
     payload = {"to": [to], "subject": subject, "html": html, "from_name": os.environ["EMAIL_FROM_NAME"]}
     async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.post(f"{EMAIL_BASE_URL}/api/v1/email/send",
