@@ -1,5 +1,6 @@
 import logging
 import os
+import secrets
 from datetime import date, timedelta
 
 from sqlalchemy import delete, func, select
@@ -29,6 +30,12 @@ TEMPLATES = [
      "layout": "classic", "background_color": "#FDFBF7", "text_color": "#1C1917", "accent_color": "#B45309",
      "font": "italiana", "subtitle": "Wij gaan trouwen", "photo_url": "/images/romantic.jpg"},
 ]
+
+
+# Demo people are identified by these e-mail addresses (example.nl is never a real customer),
+# so the demo set can be removed again without touching real data.
+DEMO_DJ_EMAILS = ("bas@example.nl", "thomas@example.nl")
+DEMO_CUSTOMER_EMAILS = ("jeroen@example.nl", "sanne@example.nl", "events@example.nl")
 
 
 def _demo_seed_enabled() -> bool:
@@ -71,16 +78,48 @@ async def cleanup_expired(session: AsyncSession):
     await session.execute(delete(LoginAttempt).where(LoginAttempt.updated_at < now() - timedelta(days=1)))
 
 
+async def _demo_ids(session: AsyncSession):
+    cust = list(await session.scalars(select(Customer.id).where(Customer.email.in_(DEMO_CUSTOMER_EMAILS))))
+    djs = list(await session.scalars(select(DJ.id).where(DJ.email.in_(DEMO_DJ_EMAILS))))
+    return cust, djs
+
+
+async def demo_status(session: AsyncSession) -> dict:
+    cust, djs = await _demo_ids(session)
+    events = await session.scalar(select(func.count()).select_from(Event).where(Event.customer_id.in_(cust))) if cust else 0
+    return {"enabled": bool(cust or djs), "events": events or 0, "customers": len(cust), "djs": len(djs)}
+
+
+async def remove_demo(session: AsyncSession) -> dict:
+    """Delete exactly the demo set: demo customers, their events (children cascade), demo DJs and their logins."""
+    cust, djs = await _demo_ids(session)
+    events = 0
+    if cust:
+        events = (await session.execute(delete(Event).where(Event.customer_id.in_(cust)))).rowcount
+    users = list(await session.scalars(select(User.id).where(
+        (User.customer_id.in_(cust or [None])) | (User.dj_id.in_(djs or [None])))))
+    if users:
+        await session.execute(delete(PasswordResetToken).where(PasswordResetToken.user_id.in_(users)))
+        await session.execute(delete(User).where(User.id.in_(users)))
+    if cust:
+        await session.execute(delete(Customer).where(Customer.id.in_(cust)))
+    if djs:  # events of real customers that used a demo DJ fall back to "geen DJ" (FK SET NULL)
+        await session.execute(delete(DJ).where(DJ.id.in_(djs)))
+    log.info("Demo data removed (%s events)", events)
+    return {"events": events, "customers": len(cust), "djs": len(djs)}
+
+
 async def seed_demo(session: AsyncSession):
-    if await session.scalar(select(func.count()).select_from(Event)):
+    if (await demo_status(session))["enabled"]:
         return
-    pw = os.environ["DEMO_PASSWORD"]  # only required when SEED_DEMO is on
+    # Demo logins only work when DEMO_PASSWORD is set (dev/tests); otherwise they get an unknown password.
+    pw = os.environ.get("DEMO_PASSWORD") or secrets.token_urlsafe(24)
 
     bas = await add_person(session, DJ, "dj", "dj_id", {
-        "name": "Bas", "email": "bas@white-vision.nl", "phone": "06 00000001",
+        "name": "Bas", "email": "bas@example.nl", "phone": "06 00000001",
         "bio": "Bruiloften en feesten met een volle dansvloer. Van Motown tot moderne house."}, pw)
     thomas = await add_person(session, DJ, "dj", "dj_id", {
-        "name": "Thomas", "email": "thomas@white-vision.nl", "phone": "06 00000002",
+        "name": "Thomas", "email": "thomas@example.nl", "phone": "06 00000002",
         "bio": "Allround DJ voor bedrijfsfeesten en verjaardagen."}, pw)
     jm = await add_person(session, Customer, "customer", "customer_id", {
         "name": "Jeroen & Mark", "email": "jeroen@example.nl", "phone": "06 00000010"}, pw)

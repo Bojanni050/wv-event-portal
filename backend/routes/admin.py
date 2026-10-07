@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +15,7 @@ from models import Customer, DJ, Event, Message, PasswordResetToken, User
 from schemas import CustomerOut, DjOut, MessageOut, PersonIn, UserOut
 from services import enrich_event
 from routes.auth import WELCOME_TTL, issue_password_link
+from seed import demo_status, remove_demo, seed_demo
 
 router = APIRouter(tags=["admin"])
 log = logging.getLogger(__name__)
@@ -217,6 +219,26 @@ def _days_until(value: Optional[date]) -> Optional[int]:
     if not value:
         return None
     return (value - date.today()).days
+
+
+class DemoToggle(BaseModel):
+    enabled: bool
+
+
+@router.get("/admin/demo")
+async def get_demo(user: dict = Depends(require_admin), session: AsyncSession = Depends(get_session)):
+    return await demo_status(session)
+
+
+@router.post("/admin/demo")
+async def set_demo(body: DemoToggle, user: dict = Depends(require_admin),
+                   session: AsyncSession = Depends(get_session)):
+    if body.enabled:
+        await seed_demo(session)
+    else:
+        await remove_demo(session)
+    await session.commit()
+    return await demo_status(session)
 
 
 @router.get("/admin/overview")

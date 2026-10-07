@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { EVENT_TYPES } from "@/lib/constants";
 import { daysUntil, formatRelative } from "@/lib/format";
 import { PageLoader, ProgressLine, StatusBadge } from "@/components/wv/bits";
+import DemoToggle from "@/components/wv/DemoToggle";
 
 export const DateBlock = ({ iso }) => {
   const d = iso ? new Date(`${iso}T12:00:00`) : null;
@@ -52,7 +53,8 @@ function greeting() {
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
-  useEffect(() => { api.get("/admin/overview").then((r) => setData(r.data)); }, []);
+  const load = () => api.get("/admin/overview").then((r) => setData(r.data));
+  useEffect(() => { load(); }, []);
   if (!data) return <PageLoader />;
   const c = data.counts;
   const next = data.upcoming[0];
@@ -95,6 +97,7 @@ export default function AdminDashboard() {
           {data.recent.map((e) => <EventRow key={e.id} e={e} extra={<p className="mt-1 text-xs text-zinc-600">{formatRelative(e.updated_at)}</p>} />)}
         </Block>
       </div>
+      {user.role === "admin" && <DemoToggle onChange={load} />}
     </div>
   );
 }

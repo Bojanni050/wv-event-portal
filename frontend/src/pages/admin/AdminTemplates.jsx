@@ -15,7 +15,7 @@ const KEYS = Object.keys(BLANK);
 
 function TemplateDialog({ tpl, onClose, onSaved }) {
   const [form, setForm] = useState(BLANK);
-  useEffect(() => tpl && setForm({ ...BLANK, ...tpl }), [tpl]);
+  useEffect(() => { if (tpl) setForm({ ...BLANK, ...tpl }); }, [tpl]);
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v?.target ? v.target.value : v }));
   const submit = async () => {
     const body = Object.fromEntries(KEYS.map((k) => [k, form[k] === "" ? null : form[k]]));

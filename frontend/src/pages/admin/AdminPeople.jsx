@@ -17,7 +17,7 @@ const COPY = {
 function PersonDialog({ kind, person, onClose, onSaved }) {
   const c = COPY[kind];
   const [form, setForm] = useState({});
-  useEffect(() => setForm(person ? { name: "", email: "", phone: "", notes: "", bio: "", password: "", send_welcome: kind === "customers" && !person.id, ...person } : {}), [person, kind]);
+  useEffect(() => { setForm(person ? { name: "", email: "", phone: "", notes: "", bio: "", password: "", send_welcome: kind === "customers" && !person.id, ...person } : {}); }, [person, kind]);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const submit = async () => {
     const welcome = kind === "customers" && !form.id && form.send_welcome;

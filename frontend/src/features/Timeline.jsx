@@ -14,7 +14,7 @@ const EMPTY = { time: "", title: "", description: "", icon: "sparkles" };
 
 function ItemDialog({ item, onClose, onSave }) {
   const [form, setForm] = useState(item || EMPTY);
-  useEffect(() => setForm(item || EMPTY), [item]);
+  useEffect(() => { setForm(item || EMPTY); }, [item]);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   return (
     <Dialog open={!!item} onOpenChange={(o) => !o && onClose()}>

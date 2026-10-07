@@ -31,8 +31,8 @@ API = f"{BASE_URL}/api"
 
 ADMIN = (os.environ.get("ADMIN_EMAIL", "admin@white-vision.nl"), os.environ.get("ADMIN_PASSWORD", "admin12345"))
 DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "demo12345")
-DJ_BAS = ("bas@white-vision.nl", DEMO_PASSWORD)
-DJ_THOMAS = ("thomas@white-vision.nl", DEMO_PASSWORD)
+DJ_BAS = ("bas@example.nl", DEMO_PASSWORD)
+DJ_THOMAS = ("thomas@example.nl", DEMO_PASSWORD)
 CUST_JEROEN = ("jeroen@example.nl", DEMO_PASSWORD)
 CUST_SANNE = ("sanne@example.nl", DEMO_PASSWORD)
 WP_API_KEY = os.environ.get("WP_API_KEY", "dev-wp-key")

@@ -75,13 +75,13 @@ def test_welcome_requires_email(admin):
 
 
 def test_create_welcome_duplicate_email_rolls_back(admin, clean_sandbox):
-    # bas@white-vision.nl already has an account (DJ)
-    before = count_customers("bas@white-vision.nl")
+    # bas@example.nl already has an account (DJ)
+    before = count_customers("bas@example.nl")
     r = admin.post(f"{API}/customers",
-                   json={"name": "TEST_Dup", "email": "bas@white-vision.nl", "send_welcome": True})
+                   json={"name": "TEST_Dup", "email": "bas@example.nl", "send_welcome": True})
     assert r.status_code == 400, r.text
     assert "account" in r.json().get("detail", "").lower()
-    after = count_customers("bas@white-vision.nl")
+    after = count_customers("bas@example.nl")
     assert after == before  # no orphan customer
 
 

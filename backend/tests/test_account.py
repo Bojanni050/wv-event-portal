@@ -68,7 +68,7 @@ def test_patch_account_persistence(jeroen):
 # --- Email already in use -> 400 ---
 def test_patch_account_email_conflict(jeroen):
     r = jeroen.patch(f"{API}/account", json={
-        "name": "Jeroen & Mark", "email": "bas@white-vision.nl", "phone": "06 00000010"})
+        "name": "Jeroen & Mark", "email": "bas@example.nl", "phone": "06 00000010"})
     assert r.status_code == 400
     assert "in gebruik" in r.json()["detail"].lower()
 
