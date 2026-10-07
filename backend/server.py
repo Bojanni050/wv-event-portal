@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -16,7 +17,15 @@ from seed import run_seed  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-app = FastAPI(title="White Vision Portal API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await run_seed()
+    yield
+    await engine.dispose()
+
+
+app = FastAPI(title="White Vision Portal API", version="1.0.0", lifespan=lifespan)
 api = APIRouter(prefix="/api")
 for module in (auth, account, events, messages, music, timeline, files, invitations, rsvp, admin, integrations):
     api.include_router(module.router)
@@ -35,13 +44,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-async def startup():
-    await run_seed()
-
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    await engine.dispose()
